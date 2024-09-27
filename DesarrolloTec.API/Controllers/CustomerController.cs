@@ -45,6 +45,8 @@ namespace DesarrolloTec.API.Controllers
         [HttpPost]
         public async Task<ActionResult> Post(Customer customer)
         {
+
+
             _context.Add(customer);
 
 
