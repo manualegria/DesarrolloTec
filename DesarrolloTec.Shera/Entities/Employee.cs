@@ -37,8 +37,6 @@ namespace DesarrolloTec.Shered.Entities
         [Required(ErrorMessage = "El {0} es obligatorio")]
         public string Phone { get; set; }
 
-        public Project Projects { get; set; }
-
         public ICollection<EmployeeProject> EmployeeProjects { get; set; }
     }
 }

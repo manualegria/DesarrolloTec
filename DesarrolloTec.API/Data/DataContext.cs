@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using DesarrolloTec.Shered.Entities;
+using DesarrolloTec.Shared.Entities;
 
 namespace DesarrolloTec.API.Data
 {
@@ -16,8 +17,9 @@ namespace DesarrolloTec.API.Data
         public DbSet<EmployeeProject> EmployeeProjects { get; set; }
         public DbSet<ProjectService> ProjectService { get; set; }
         public DbSet<Service> Services { get; set; }
-        
-      
+        public DbSet<Tasks> Tasks { get; set; }
+        public DbSet<Resource> Resourcess { get; set; }
+        public DbSet<Invoice> Invoices { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

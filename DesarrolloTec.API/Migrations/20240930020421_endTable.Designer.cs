@@ -4,6 +4,7 @@ using DesarrolloTec.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DesarrolloTec.API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240930020421_endTable")]
+    partial class endTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,110 +24,6 @@ namespace DesarrolloTec.API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("DesarrolloTec.Shared.Entities.Invoice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("CustomersId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DateIssued")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ProjectsId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomersId");
-
-                    b.HasIndex("ProjectsId");
-
-                    b.ToTable("Invoices");
-                });
-
-            modelBuilder.Entity("DesarrolloTec.Shared.Entities.Resource", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("ProjectsId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ResourceName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ResourceType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectsId");
-
-                    b.ToTable("Resourcess");
-                });
-
-            modelBuilder.Entity("DesarrolloTec.Shared.Entities.Tasks", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AssignmateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DeadlineDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("EmployeesId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProjectsId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeesId");
-
-                    b.HasIndex("ProjectsId");
-
-                    b.ToTable("Tasks");
-                });
 
             modelBuilder.Entity("DesarrolloTec.Shered.Entities.Customer", b =>
                 {
@@ -317,45 +216,6 @@ namespace DesarrolloTec.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Services");
-                });
-
-            modelBuilder.Entity("DesarrolloTec.Shared.Entities.Invoice", b =>
-                {
-                    b.HasOne("DesarrolloTec.Shered.Entities.Customer", "Customers")
-                        .WithMany()
-                        .HasForeignKey("CustomersId");
-
-                    b.HasOne("DesarrolloTec.Shered.Entities.Project", "Projects")
-                        .WithMany()
-                        .HasForeignKey("ProjectsId");
-
-                    b.Navigation("Customers");
-
-                    b.Navigation("Projects");
-                });
-
-            modelBuilder.Entity("DesarrolloTec.Shared.Entities.Resource", b =>
-                {
-                    b.HasOne("DesarrolloTec.Shered.Entities.Project", "Projects")
-                        .WithMany()
-                        .HasForeignKey("ProjectsId");
-
-                    b.Navigation("Projects");
-                });
-
-            modelBuilder.Entity("DesarrolloTec.Shared.Entities.Tasks", b =>
-                {
-                    b.HasOne("DesarrolloTec.Shered.Entities.Employee", "Employees")
-                        .WithMany()
-                        .HasForeignKey("EmployeesId");
-
-                    b.HasOne("DesarrolloTec.Shered.Entities.Project", "Projects")
-                        .WithMany()
-                        .HasForeignKey("ProjectsId");
-
-                    b.Navigation("Employees");
-
-                    b.Navigation("Projects");
                 });
 
             modelBuilder.Entity("DesarrolloTec.Shered.Entities.EmployeeProject", b =>
