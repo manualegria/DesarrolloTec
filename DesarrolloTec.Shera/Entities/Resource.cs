@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DesarrolloTec.Shared.Entities
@@ -28,7 +29,9 @@ namespace DesarrolloTec.Shared.Entities
         [Required(ErrorMessage = "El {0} es obligatorio")]
         public string Description { get; set; }
 
+        [JsonIgnore]
         public Project Projects { get; set; }
+        public int ProjectId { get; set; }
 
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DesarrolloTec.Shered.Entities
@@ -28,6 +29,7 @@ namespace DesarrolloTec.Shered.Entities
         public decimal EstimatedPrice { get; set; }
 
 
-
+        [JsonIgnore]
+        public ICollection<ProjectService> projectServices { get; set; }
     }
 }
