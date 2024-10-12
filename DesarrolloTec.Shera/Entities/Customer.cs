@@ -45,6 +45,6 @@ namespace DesarrolloTec.Shered.Entities
         public string Nit { get; set; }
 
         [JsonIgnore]
-        public ICollection<EmployeeProject> EmployeeProjects { set; get; }
+        public ICollection<Project> Projects { set; get; }
     }
 }
