@@ -17,7 +17,7 @@ namespace DesarrolloTec.API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -30,7 +30,7 @@ namespace DesarrolloTec.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CustomersId")
+                    b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DateIssued")
@@ -40,7 +40,7 @@ namespace DesarrolloTec.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProjectsId")
+                    b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalAmount")
@@ -48,9 +48,9 @@ namespace DesarrolloTec.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomersId");
+                    b.HasIndex("CustomerId");
 
-                    b.HasIndex("ProjectsId");
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("Invoices");
                 });
@@ -68,7 +68,7 @@ namespace DesarrolloTec.API.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("ProjectsId")
+                    b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<string>("ResourceName")
@@ -83,7 +83,7 @@ namespace DesarrolloTec.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectsId");
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("Resourcess");
                 });
@@ -107,10 +107,10 @@ namespace DesarrolloTec.API.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("EmployeesId")
+                    b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ProjectsId")
+                    b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -119,9 +119,9 @@ namespace DesarrolloTec.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeesId");
+                    b.HasIndex("EmployeeId");
 
-                    b.HasIndex("ProjectsId");
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("Tasks");
                 });
@@ -214,17 +214,17 @@ namespace DesarrolloTec.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("EmployeesId")
+                    b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ProjectsId")
+                    b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeesId");
+                    b.HasIndex("EmployeeId");
 
-                    b.HasIndex("ProjectsId");
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("EmployeeProjects");
                 });
@@ -240,7 +240,7 @@ namespace DesarrolloTec.API.Migrations
                     b.Property<decimal>("Budget")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("CustomersId")
+                    b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
                     b.Property<string>("Descripcion")
@@ -265,7 +265,7 @@ namespace DesarrolloTec.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomersId");
+                    b.HasIndex("CustomerId");
 
                     b.ToTable("Projects");
                 });
@@ -278,15 +278,15 @@ namespace DesarrolloTec.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ProjectsId")
+                    b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ServicesId")
+                    b.Property<int>("ServicesId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectsId");
+                    b.HasIndex("ProjectId");
 
                     b.HasIndex("ServicesId");
 
@@ -323,11 +323,15 @@ namespace DesarrolloTec.API.Migrations
                 {
                     b.HasOne("DesarrolloTec.Shered.Entities.Customer", "Customers")
                         .WithMany()
-                        .HasForeignKey("CustomersId");
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("DesarrolloTec.Shered.Entities.Project", "Projects")
                         .WithMany()
-                        .HasForeignKey("ProjectsId");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Customers");
 
@@ -338,7 +342,9 @@ namespace DesarrolloTec.API.Migrations
                 {
                     b.HasOne("DesarrolloTec.Shered.Entities.Project", "Projects")
                         .WithMany()
-                        .HasForeignKey("ProjectsId");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Projects");
                 });
@@ -347,11 +353,15 @@ namespace DesarrolloTec.API.Migrations
                 {
                     b.HasOne("DesarrolloTec.Shered.Entities.Employee", "Employees")
                         .WithMany()
-                        .HasForeignKey("EmployeesId");
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("DesarrolloTec.Shered.Entities.Project", "Projects")
                         .WithMany()
-                        .HasForeignKey("ProjectsId");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Employees");
 
@@ -362,11 +372,15 @@ namespace DesarrolloTec.API.Migrations
                 {
                     b.HasOne("DesarrolloTec.Shered.Entities.Employee", "Employees")
                         .WithMany("EmployeeProjects")
-                        .HasForeignKey("EmployeesId");
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("DesarrolloTec.Shered.Entities.Project", "Projects")
                         .WithMany("EmployeeProjects")
-                        .HasForeignKey("ProjectsId");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Employees");
 
@@ -377,7 +391,9 @@ namespace DesarrolloTec.API.Migrations
                 {
                     b.HasOne("DesarrolloTec.Shered.Entities.Customer", "Customers")
                         .WithMany()
-                        .HasForeignKey("CustomersId");
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Customers");
                 });
@@ -386,11 +402,15 @@ namespace DesarrolloTec.API.Migrations
                 {
                     b.HasOne("DesarrolloTec.Shered.Entities.Project", "Projects")
                         .WithMany("ProjectServices")
-                        .HasForeignKey("ProjectsId");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("DesarrolloTec.Shered.Entities.Service", "Services")
-                        .WithMany()
-                        .HasForeignKey("ServicesId");
+                        .WithMany("projectServices")
+                        .HasForeignKey("ServicesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Projects");
 
@@ -407,6 +427,11 @@ namespace DesarrolloTec.API.Migrations
                     b.Navigation("EmployeeProjects");
 
                     b.Navigation("ProjectServices");
+                });
+
+            modelBuilder.Entity("DesarrolloTec.Shered.Entities.Service", b =>
+                {
+                    b.Navigation("projectServices");
                 });
 #pragma warning restore 612, 618
         }
