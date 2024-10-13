@@ -44,7 +44,5 @@ namespace DesarrolloTec.Shered.Entities
         [Required(ErrorMessage = "El {5} es obligatorio")]
         public string Nit { get; set; }
 
-        [JsonIgnore]
-        public ICollection<Project> Projects { set; get; }
     }
 }
