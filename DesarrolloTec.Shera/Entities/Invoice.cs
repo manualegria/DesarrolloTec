@@ -12,7 +12,7 @@ namespace DesarrolloTec.Shared.Entities
     {
         public int Id { get; set; }
 
-        [Display(Name = "Fecha de espedición")]
+        [Display(Name = "Fecha de expedición")]
         [Required(ErrorMessage = "El {0} es obligatorio")]
         [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm}")]
         public DateTime DateIssued { get; set; }

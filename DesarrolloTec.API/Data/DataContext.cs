@@ -15,7 +15,7 @@ namespace DesarrolloTec.API.Data
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<EmployeeProject> EmployeeProjects { get; set; }
-        public DbSet<ProjectService> ProjectService { get; set; }
+        public DbSet<ProjectService> ProjectServices { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Tasks> Tasks { get; set; }
         public DbSet<Resource> Resourcess { get; set; }
