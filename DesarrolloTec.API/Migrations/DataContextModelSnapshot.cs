@@ -88,7 +88,7 @@ namespace DesarrolloTec.API.Migrations
                     b.ToTable("Resourcess");
                 });
 
-            modelBuilder.Entity("DesarrolloTec.Shared.Entities.Tasks", b =>
+            modelBuilder.Entity("DesarrolloTec.Shared.Entities.USerTask", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -113,9 +113,8 @@ namespace DesarrolloTec.API.Migrations
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -123,7 +122,7 @@ namespace DesarrolloTec.API.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("USerTasks");
                 });
 
             modelBuilder.Entity("DesarrolloTec.Shered.Entities.Customer", b =>
@@ -181,7 +180,12 @@ namespace DesarrolloTec.API.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -191,12 +195,12 @@ namespace DesarrolloTec.API.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<string>("position")
+                    b.Property<string>("Position")
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<string>("specialization")
+                    b.Property<string>("Specialization")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -213,6 +217,9 @@ namespace DesarrolloTec.API.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssignedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
@@ -259,9 +266,8 @@ namespace DesarrolloTec.API.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -322,13 +328,13 @@ namespace DesarrolloTec.API.Migrations
             modelBuilder.Entity("DesarrolloTec.Shared.Entities.Invoice", b =>
                 {
                     b.HasOne("DesarrolloTec.Shered.Entities.Customer", "Customers")
-                        .WithMany()
+                        .WithMany("Invoices")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("DesarrolloTec.Shered.Entities.Project", "Projects")
-                        .WithMany()
+                        .WithMany("Invoices")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -341,7 +347,7 @@ namespace DesarrolloTec.API.Migrations
             modelBuilder.Entity("DesarrolloTec.Shared.Entities.Resource", b =>
                 {
                     b.HasOne("DesarrolloTec.Shered.Entities.Project", "Projects")
-                        .WithMany()
+                        .WithMany("Resources")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -349,10 +355,10 @@ namespace DesarrolloTec.API.Migrations
                     b.Navigation("Projects");
                 });
 
-            modelBuilder.Entity("DesarrolloTec.Shared.Entities.Tasks", b =>
+            modelBuilder.Entity("DesarrolloTec.Shared.Entities.USerTask", b =>
                 {
                     b.HasOne("DesarrolloTec.Shered.Entities.Employee", "Employees")
-                        .WithMany()
+                        .WithMany("USerTasks")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -390,7 +396,7 @@ namespace DesarrolloTec.API.Migrations
             modelBuilder.Entity("DesarrolloTec.Shered.Entities.Project", b =>
                 {
                     b.HasOne("DesarrolloTec.Shered.Entities.Customer", "Customers")
-                        .WithMany()
+                        .WithMany("Projects")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -417,16 +423,29 @@ namespace DesarrolloTec.API.Migrations
                     b.Navigation("Services");
                 });
 
+            modelBuilder.Entity("DesarrolloTec.Shered.Entities.Customer", b =>
+                {
+                    b.Navigation("Invoices");
+
+                    b.Navigation("Projects");
+                });
+
             modelBuilder.Entity("DesarrolloTec.Shered.Entities.Employee", b =>
                 {
                     b.Navigation("EmployeeProjects");
+
+                    b.Navigation("USerTasks");
                 });
 
             modelBuilder.Entity("DesarrolloTec.Shered.Entities.Project", b =>
                 {
                     b.Navigation("EmployeeProjects");
 
+                    b.Navigation("Invoices");
+
                     b.Navigation("ProjectServices");
+
+                    b.Navigation("Resources");
                 });
 
             modelBuilder.Entity("DesarrolloTec.Shered.Entities.Service", b =>
