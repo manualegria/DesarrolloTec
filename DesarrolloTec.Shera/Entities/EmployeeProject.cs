@@ -20,5 +20,9 @@ namespace DesarrolloTec.Shered.Entities
         public Employee Employees { get; set; }
         public int EmployeeId { get; set; }
 
+        public string ProjectName => Projects.Name ?? "No asignado";
+        public string EmployeeName => Employees?.FullName ?? "No asignado";
+        public DateTime AssignedDate { get; set; }
+
     }
 }

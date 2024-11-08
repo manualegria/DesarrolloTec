@@ -6,6 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using DesarrolloTec.Shared.Enums;
+using DesarrolloTec.Shared.Entities;
+
 
 namespace DesarrolloTec.Shered.Entities
 {
@@ -22,7 +25,7 @@ namespace DesarrolloTec.Shered.Entities
 
         [Display(Name = " Estado del proyecto")]
         [Required(ErrorMessage = "El {0} es obligatorio")]
-        public string Status { get; set; }
+        public ProjectStatus Status { get; set; }
 
 
         [Display(Name = "Presupuesto")]
@@ -46,6 +49,8 @@ namespace DesarrolloTec.Shered.Entities
         public DateTime EndDate { get; set; }
 
         // Envia foranea a ProjectService
+
+        [JsonIgnore]
         public ICollection<ProjectService> ProjectServices { get; set; }
 
         // Recibe foranea de customer
@@ -56,5 +61,11 @@ namespace DesarrolloTec.Shered.Entities
 
         [JsonIgnore]
         public ICollection<EmployeeProject> EmployeeProjects { set; get; }
+
+        [JsonIgnore]
+        public ICollection<Resource> Resources { get; set; }
+
+        [JsonIgnore]
+        public ICollection<Invoice> Invoices { get; set; }
     }
 }

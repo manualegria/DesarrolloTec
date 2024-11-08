@@ -1,7 +1,9 @@
-﻿using System;
+﻿using DesarrolloTec.Shared.Entities;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -43,6 +45,12 @@ namespace DesarrolloTec.Shered.Entities
         [MaxLength(10, ErrorMessage = "El {5}, no puede tener mas de 50 caractere.")]
         [Required(ErrorMessage = "El {5} es obligatorio")]
         public string Nit { get; set; }
+
+        [JsonIgnore]
+        public ICollection<Project> Projects { set; get; }
+
+        [JsonIgnore]
+        public ICollection<Invoice> Invoices { get; set; }
 
     }
 }

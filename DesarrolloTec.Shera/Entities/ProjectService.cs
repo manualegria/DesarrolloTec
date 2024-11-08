@@ -20,6 +20,9 @@ namespace DesarrolloTec.Shered.Entities
         [JsonIgnore]
         public Service Services { get; set; }
         public int ServicesId { get; set; }
-        
+
+
+        public string ProjectName => Projects?.Name ?? "No asignado";
+        public string ServiceName => Services?.Name ?? "No asignado";
     }
 }
