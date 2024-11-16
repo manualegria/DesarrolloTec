@@ -1,0 +1,36 @@
+﻿@page "/resource/create"
+@using DesarrolloTec.Shared.Entities
+@using CurrieTechnologies.Razor.SweetAlert2
+
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService swal
+
+
+<h3>Crear Cliente</h3>
+<ResourceForm @ref="resourceForm" Resource="Resource" OnSubmit="Create" ReturnAction="Return" />
+
+@code {
+    private Resource Resource = new();
+    private ResourceForm resourceForm;
+
+    private async Task Create()
+    {
+        var responseHttp = await repository.PostAsync("/api/resources", Resource);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await swal.FireAsync("Error", message, SweetAlertIcon.Error);        
+        }
+        else
+        {
+            await swal.FireAsync("Éxito", "El servicio se ha creado correctamente.");
+            navigationManager.NavigateTo("/resources");
+        }
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("/resources");
+    }
+}

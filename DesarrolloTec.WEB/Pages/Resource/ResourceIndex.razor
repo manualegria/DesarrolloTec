@@ -1,0 +1,115 @@
+﻿@page "/resources"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using DesarrolloTec.Shared.Entities
+@using DesarrolloTec.WEB.Repositories
+@using DesarrolloTec.WEB.Shared
+
+
+
+@inject IRepository repository 
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+
+
+<div class="mb-3">
+
+
+    <a class="btn btn-primary " href="/resource/create">Crear Cliente</a>
+
+</div>
+
+<GenericList MyList="Resources">
+
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nombre del recurso</th>
+                    <th>Tipo de recurso</th>
+                    <th>Descripcion del recurso</th>
+                    <th>Preyecto</th>
+                   
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var resource in Resources!)
+                {
+                    <tr>
+                        
+                        <td> @resource.ResourceName </td>
+                        <td> @resource.ResourceType</td>
+                        <td> @resource.Description</td>
+                        <td> @resource.Projects?.Name</td>
+
+
+                        <td>
+                            <a href="/resource/edit/@resource.Id" class="btn btn-warning">Editar</a>
+                            <button class="btn btn-danger" @onclick=@(()=>DeleteAsync(resource))>Borrar</button>
+                          
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </Body>
+ 
+</GenericList>
+
+
+
+@code {
+
+
+    public List<Resource> Resources { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var responseHppt = await repository.GetAsync<List<Resource>>("/api/resources");
+        Resources = responseHppt.Response!;
+    }
+
+    private async Task DeleteAsync(Resource Resource)
+    {
+        var result = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Esta seguro que quieres borrar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHTTP = await repository.DeleteAsync($"api/resources/{Resource.Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var mensajeError = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            await Load();
+        }
+    }
+}
