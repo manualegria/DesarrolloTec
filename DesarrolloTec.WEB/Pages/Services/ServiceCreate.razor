@@ -1,29 +1,39 @@
 ﻿@page "/services/create"
 @using DesarrolloTec.Shared.Entities
+@using CurrieTechnologies.Razor.SweetAlert2
+
 
 @inject IRepository repository
 @inject NavigationManager navigationManager
-@inject SweetAlertService sweetAlertService
+@inject SweetAlertService swal
 
-<h3>Participant Create</h3>
+
+<h3>Crear Servicio</h3>
 
 <ServiceForm @ref="serviceForm" Service="Service" OnSubmit="Create" ReturnAction="Return" />
 
 @code {
     private Service Service = new();
     private ServiceForm serviceForm;
+ 
 
     private async Task Create()
     {
+
+
         var responseHttp = await repository.PostAsync("/api/services", Service);
         if (responseHttp.Error)
         {
             var message = await responseHttp.GetErrorMessageAsync();
-            await sweetAlertService.FireAsync("Error", message);
-            return;
+            await swal.FireAsync("Error", message, SweetAlertIcon.Error);
+          
         }
+        else
+        {
 
-        navigationManager.NavigateTo("/services");
+            await swal.FireAsync("Éxito", "El servicio se ha creado correctamente.");
+            navigationManager.NavigateTo("/services");
+        }
     }
 
     private void Return()
