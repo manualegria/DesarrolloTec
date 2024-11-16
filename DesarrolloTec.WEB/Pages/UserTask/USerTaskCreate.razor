@@ -1,0 +1,33 @@
+﻿@page "/task/create"
+@using DesarrolloTec.Shared.Entities
+
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3> Crear Tarea</h3>
+
+<USerTaskFrom @ref="userTaskForm" USerTask="USerTask" OnSubmit="Create" ReturnAction="Return" />
+
+@code {
+    private USerTask USerTask = new();
+    private USerTaskFrom userTaskForm;
+
+    private async Task Create()
+    {
+        var responseHttp = await repository.PostAsync("/api/task", USerTask);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+
+        navigationManager.NavigateTo("/tasks");
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("/tasks");
+    }
+}

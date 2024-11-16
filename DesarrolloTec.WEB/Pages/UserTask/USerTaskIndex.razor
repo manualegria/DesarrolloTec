@@ -1,0 +1,152 @@
+﻿@page "/tasks"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using DesarrolloTec.Shared.Entities
+@using DesarrolloTec.Shered.Entities
+@using DesarrolloTec.WEB.Repositories
+@using DesarrolloTec.WEB.Shared
+
+
+
+@inject IRepository repository
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+
+
+<div class="mb-3">
+    <a class="btn btn-primary " href="/task/create">Crear Tareas</a>
+</div>
+
+<div class="mb-3">
+    <input type="text" @bind="searchTerm" placeholder="Buscar por Nombre " class="form-control" />
+    <button class="btn btn-secondary mt-2" @onclick="Search">Buscar</button>
+    <button class="btn btn-outline-secondary mt-2" @onclick="ClearSearch">Limpiar</button>
+</div>
+
+<GenericList MyList="filteredUsertasks">
+
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    
+                    <th>Descripcion</th>
+                    <th>Fecha de asignacion</th>
+                    <th>Fecha limite</th>
+                    <th>Estado de la tarea</th>
+                    <th>Proyecto</th>
+                    <th>Empleado</th>
+                    <th>Acciones</th>
+
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var task in filteredUsertasks!)
+                {
+                    <tr>
+
+                       
+                        <td>@task.Description</td>
+                        <td> @task.AssignmateDate</td>
+                        <td> @task.DeadlineDate</td>
+                        <td> @task.Status</td>
+                        <td> @task.Projects?.Name</td>
+                        <td> @task.Employees?.FullName</td>
+
+
+                        <td>
+                            <a href="/task/edit/@task.Id" class="btn btn-warning">Editar</a>
+                            <button class="btn btn-danger" @onclick=@(()=>DeleteAsync(task))>Borrar</button>
+                            @*   <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(service))><i class="oi oi-trash" /> Borrar</button> *@
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </Body>
+
+</GenericList>
+
+
+
+
+
+@code {
+
+
+    public List<USerTask> USerTasks { get; set; }
+    public List<USerTask> filteredUsertasks { get; set; }
+    private string searchTerm = string.Empty;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var responseHppt = await repository.GetAsync<List<USerTask>>("/api/task");
+        USerTasks = responseHppt.Response ?? new List<USerTask>();
+        filteredUsertasks = new List<USerTask>(USerTasks);
+    }
+
+      private void Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredUsertasks = new List<USerTask>(USerTasks);
+        }
+        else
+        {
+            filteredUsertasks = USerTasks 
+            .Where(c => c.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+             .ToList();
+        }
+    }
+
+  
+     private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        filteredUsertasks = new List<USerTask>(USerTasks);
+    }
+
+    private async Task DeleteAsync(USerTask USerTask)
+    {
+        var result = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Esta seguro que quieres borrar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHTTP = await repository.DeleteAsync($"api/task/{USerTask.Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var mensajeError = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            await Load();
+        }
+    }
+}
