@@ -1,0 +1,116 @@
+﻿@page "/employees"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using DesarrolloTec.Shared.Entities
+@using DesarrolloTec.Shered.Entities
+@using DesarrolloTec.WEB.Repositories
+@using DesarrolloTec.WEB.Shared
+
+
+
+@inject IRepository repository 
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+
+
+<div class="mb-3">
+
+
+    <a class="btn btn-primary " href="/employee/create">Crear Empleado</a>
+
+</div>
+
+<GenericList MyList="Employees">
+
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Cargo del empleado</th>
+                    <th>Especializacion</th>
+                    <th>"Correo electronico</th>
+                    <th>Telefono</th>
+                   
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var employee in Employees!)
+                {
+                    <tr>
+                        
+                        <td> @employee.FullName </td>
+                        <td> @employee.Position</td>
+                        <td> @employee.Specialization</td>  
+                        <td> @employee.Email</td>
+                        <td> @employee.Phone</td>
+
+
+                        <td>
+                            <a href="/employee/edit/@employee.Id" class="btn btn-warning">Editar</a>
+                            <button class="btn btn-danger" @onclick=@(()=>DeleteAsync(employee))>Borrar</button>
+                        
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </Body>
+ 
+</GenericList>
+
+@code {
+
+
+    public List<Employee> Employees { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var responseHppt = await repository.GetAsync<List<Employee>>("/api/employee");
+        Employees = responseHppt.Response!;
+    }
+
+    private async Task DeleteAsync(Employee Employee)
+    {
+        var result = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Esta seguro que quieres borrar el empleado?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHTTP = await repository.DeleteAsync($"api/employee/{Employee.Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var mensajeError = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            await Load();
+        }
+    }
+}
