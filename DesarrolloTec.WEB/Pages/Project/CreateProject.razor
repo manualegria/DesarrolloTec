@@ -1,0 +1,33 @@
+﻿@page "/projects/create"
+@using DesarrolloTec.Shared.Entities
+
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>Projecto Create</h3>
+
+<ProjectForm @ref="projectForm" Project="Project" OnSubmit="Create" ReturnAction="Return" />
+
+@code {
+    private Project Project = new();
+    private ProjectForm projectForm;
+
+    private async Task Create()
+    {
+        var responseHttp = await repository.PostAsync("/api/projects", Project);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+
+        navigationManager.NavigateTo("/projects");
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("/projects");
+    }
+}

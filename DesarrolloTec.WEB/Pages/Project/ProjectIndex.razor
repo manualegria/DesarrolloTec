@@ -1,0 +1,126 @@
+﻿@page "/projects"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using DesarrolloTec.Shared.Entities
+@using DesarrolloTec.Shered.Entities
+@using DesarrolloTec.WEB.Repositories
+@using DesarrolloTec.WEB.Shared
+
+
+
+@inject IRepository repository
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+
+
+<div class="mb-3">
+
+
+    <a class="btn btn-primary " href="/projects/create">Crear Proyecto</a>
+
+</div>
+
+
+
+    <GenericList MyList="Projects">
+
+        <Body>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Estado</th>
+                        <th>Presupuesto</th>
+                        <th>Descripción</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Cliente</th>
+
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var project in Projects!)
+                    {
+                        <tr>
+
+                            <td> @project.Name </td>
+                            <td>@project.Status</td>
+                            <td> @project.Budget</td>
+                            <td> @project.Descripcion</td>
+                            <td> @project.StartDate</td>
+                            <td> @project.EndDate</td>
+                            <td> @project.Customers?.Name </td>
+
+
+                            <td>
+                                <a href="/project/edit/@project.Id" class="btn btn-warning">Editar</a>
+                                <button class="btn btn-danger" @onclick=@(()=>DeleteAsync(project))>Borrar</button>
+                                @*   <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(service))><i class="oi oi-trash" /> Borrar</button> *@
+                            </td>
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </Body>
+
+    </GenericList>
+
+
+
+
+
+@code {
+
+
+    public List<Project> Projects { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var responseHppt = await repository.GetAsync<List<Project>>("/api/projects");
+        Projects = responseHppt.Response!;
+    }
+
+    private async Task DeleteAsync(Project project)
+    {
+        var result = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Esta seguro que quieres borrar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHTTP = await repository.DeleteAsync($"api/projects/{project.Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var mensajeError = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            await Load();
+        }
+    }
+}

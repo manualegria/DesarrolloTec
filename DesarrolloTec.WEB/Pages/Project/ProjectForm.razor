@@ -1,0 +1,172 @@
+﻿@using DesarrolloTec.Shared.Entities
+@using DesarrolloTec.Shared.Enums
+
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+@inject IRepository repository
+
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation"></NavigationLock>
+<EditForm EditContext="editContext" OnSubmit="OnSubmit">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+
+        <label>Nombre de Proyecto:</label>
+
+        <div>
+            <InputText width="10" @bind-Value="Project.Name" />
+            <ValidationMessage For="@(()=>Project.Name )" />
+
+        </div>
+
+    </div>
+
+    <div class="mb-3">
+        <label>Estado:</label>
+        <div>
+            <InputSelect @bind-Value="Project.Status">
+                @foreach (DesarrolloTec.Shared.Enums.ProjectStatus status in Enum.GetValues(typeof(DesarrolloTec.Shared.Enums.ProjectStatus)))
+                {
+                    <option value="@(Convert.ToInt32(status))">@status</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+
+    <div class="mb-3">
+
+        <label>Presupuesto:</label>
+
+        <div>
+            <InputNumber width="10" @bind-Value="Project.Budget" />
+            <ValidationMessage For="@(()=>Project.Budget )" />
+
+        </div>
+
+    </div>
+
+    <div class="mb-3">
+        <label>Descripción:</label>
+
+        <div>
+            <InputTextArea width="10" @bind-Value="Project.Descripcion" />
+            <ValidationMessage For="@(()=>Project.Descripcion)" />
+
+        </div>
+    </div>
+
+
+    <div class="mb-3">
+        <label>Fecha Inicio :</label>
+
+
+        <div>
+            <InputDate width="10" @bind-Value="Project.StartDate" />
+            <ValidationMessage For="@(()=>Project.StartDate)" />
+
+        </div>
+
+    </div>
+
+    <div class="mb-3">
+        <label>Fecha Inicio :</label>
+
+
+        <div>
+            <InputDate width="10" @bind-Value="Project.EndDate" />
+            <ValidationMessage For="@(()=>Project.EndDate)" />
+
+        </div>
+
+    </div>
+
+    <div class="mb-3">
+        <label>Cliente:</label>
+        <div>
+            <InputSelect @bind-Value="Project.CustomerId">
+                <option value="">Selecciona el Cliente</option>
+                @foreach (var customer in customers)
+                {
+                    <option value="@customer.Id">@customer.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Project.CustomerId)" />
+        </div>
+    </div>
+
+
+
+    <button class="btn btn-primary" type="submit">guardar</button>
+    <button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
+
+
+
+
+</EditForm>
+
+
+
+@code {
+    private EditContext editContext = null;
+    private List<Customer> customers = new();
+
+    protected override async void OnInitialized()
+    {
+        editContext = new(Project);
+        var customerResponse = await repository.GetAsync<List<Customer>>("/api/customers");
+
+        if (customerResponse.Response != null)
+        {
+            customers = customerResponse.Response;
+        }
+    }
+
+
+    [EditorRequired]
+    [Parameter]
+    public Project Project { get; set; }
+
+
+    [EditorRequired]
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    [EditorRequired]
+    [Parameter]
+
+    public EventCallback ReturnAction { get; set; }
+
+
+    public bool FormPostedSuccessfully { get; set; } = false;
+
+    private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+    {
+        var formWasEdited = editContext.IsModified();
+
+        if (!formWasEdited)
+        {
+            return;
+        }
+
+        if (FormPostedSuccessfully)
+        {
+            return;
+        }
+
+        var result = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Deseas abandonar la página y perder los cambios?",
+                Icon = SweetAlertIcon.Warning,
+                ShowCancelButton = true
+            });
+
+        var confirm = !string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        context.PreventNavigation();
+    }
+}
