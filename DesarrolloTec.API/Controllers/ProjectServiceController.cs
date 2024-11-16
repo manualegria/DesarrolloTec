@@ -61,7 +61,7 @@ namespace DesarrolloTec.API.Controllers
 
         public async Task<IActionResult> Put(ProjectService projectservices)
         {
-            _context.ProjectService.Add(projectservices);
+            _context.ProjectService.Update(projectservices);
             await _context.SaveChangesAsync();
             return Ok(new
             {

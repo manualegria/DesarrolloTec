@@ -60,7 +60,7 @@ namespace DesarrolloTec.API.Controllers
 
         public async Task<IActionResult> Put(EmployeeProject employeeproject)
         {
-            _context.EmployeeProjects.Add(employeeproject);
+            _context.EmployeeProjects.Update(employeeproject);
             await _context.SaveChangesAsync();
             return Ok(new
             {

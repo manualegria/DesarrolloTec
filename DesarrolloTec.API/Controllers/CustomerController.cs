@@ -70,30 +70,27 @@ namespace DesarrolloTec.API.Controllers
 
         // Eliminar 
         [HttpDelete("{id:int}")]
-
         public async Task<ActionResult> Delete(int id)
         {
-
-            var customerDelete = await _context.Customers
-                .Where(x => x.Id == id)
-                .ExecuteDeleteAsync();
-
-            if (customerDelete == 0)
+            try
             {
+                var customerDelete = await _context.Customers
+                    .Where(x => x.Id == id).ExecuteDeleteAsync();
 
-
-
-                return NotFound(new { message = "Cliente no encontrado." });
-            }
-            else
-            {
+                if (customerDelete == 0)
+                {
+                    return NotFound(new { message = "Cliente no encontrado." });
+                }
 
                 return Ok(new { message = "Cliente eliminado con éxito." });
             }
-
-
-
+            catch (Exception ex)
+            {
+                // Log the exception (opcional)
+                return StatusCode(500, new { message = "Error al eliminar el cliente.", details = ex.Message });
+            }
         }
+
 
 
 

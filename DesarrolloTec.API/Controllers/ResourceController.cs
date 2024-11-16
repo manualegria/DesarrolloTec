@@ -17,9 +17,11 @@ namespace DesarrolloTec.API.Controllers
 
         [HttpGet]
 
-        public async Task<IActionResult> Get()
+        public async Task<List<Resource>> GetInvoicesAsync()
         {
-            return Ok(await _context.Resourcess.ToListAsync());
+            return await _context.Resourcess
+                .Include(i => i.Projects)
+                .ToListAsync();
         }
 
 
@@ -27,7 +29,9 @@ namespace DesarrolloTec.API.Controllers
 
         public async Task<IActionResult> Get(int id)
         {
-            var resource = await _context.Resourcess.SingleOrDefaultAsync(x => x.Id == id);
+            var resource = await _context.Resourcess
+            .Include(i => i.Projects)
+            .SingleOrDefaultAsync(x => x.Id == id);
 
             if (resource == null)
             {
@@ -39,7 +43,7 @@ namespace DesarrolloTec.API.Controllers
                 return Ok(resource);
             }
         }
-
+          
         [HttpPost]
 
         public async Task<IActionResult> Post(Resource resource)
@@ -57,7 +61,7 @@ namespace DesarrolloTec.API.Controllers
 
         public async Task<IActionResult> Put(Resource resource)
         {
-            _context.Resourcess.Add(resource);
+            _context.Resourcess.Update(resource);
             await _context.SaveChangesAsync();
             return Ok(new
             {

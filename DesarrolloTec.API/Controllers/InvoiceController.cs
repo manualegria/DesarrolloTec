@@ -20,28 +20,34 @@ namespace DesarrolloTec.API.Controllers
 
         [HttpGet]
 
-        public async Task<IActionResult> Get()
+        public async Task<List<Invoice>> GetInvoicesAsync()
         {
-            return Ok(await _context.Invoices.ToListAsync());
+            return await _context.Invoices
+                .Include(i => i.Customers)
+                .Include(i => i.Projects)
+                .ToListAsync();
         }
-
 
         [HttpGet("{id:int}")]
 
         public async Task<IActionResult> Get(int id)
         {
-            var invoice = await _context.Invoices.SingleOrDefaultAsync(x => x.Id == id);
+            var invoice = await _context.Invoices
+            .Include(i => i.Customers)
+            .Include(i => i.Projects)
+            .SingleOrDefaultAsync(x => x.Id == id);
 
             if (invoice == null)
             {
                 return NotFound();
-
             }
             else
             {
                 return Ok(invoice);
             }
+        
         }
+
         [HttpPost]
 
         public async Task<IActionResult> Post(Invoice invoice)
@@ -59,7 +65,7 @@ namespace DesarrolloTec.API.Controllers
 
         public async Task<IActionResult> Put(Invoice invoice)
         {
-            _context.Invoices.Add(invoice);
+            _context.Invoices.Update(invoice);
             await _context.SaveChangesAsync();
             return Ok(new
             {

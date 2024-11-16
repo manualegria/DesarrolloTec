@@ -61,13 +61,9 @@ namespace DesarrolloTec.API.Controllers
 
         public async Task<IActionResult> Put(Employee employee)
         {
-            _context.Employees.Add(employee);
+            _context.Employees.Update(employee);
             await _context.SaveChangesAsync();
-            return Ok(new
-            {
-                message = "Empleado Actualizado con éxito.",
-                data = employee
-            });
+            return Ok(employee);
         }
 
         [HttpDelete("{id:int}")]

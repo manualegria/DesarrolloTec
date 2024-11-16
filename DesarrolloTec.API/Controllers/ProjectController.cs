@@ -1,4 +1,5 @@
 ﻿using DesarrolloTec.API.Data;
+using DesarrolloTec.Shared.Entities;
 using DesarrolloTec.Shered.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,7 @@ namespace DesarrolloTec.API.Controllers
 {
 
     [ApiController]
-    [Route("/api/project")]
+    [Route("/api/projects")]
 
     public class ProjectController : ControllerBase
     {
@@ -21,16 +22,25 @@ namespace DesarrolloTec.API.Controllers
 
         [HttpGet]
 
-        public async  Task<IActionResult> Get()
+        //public async  Task<IActionResult> Get()
+        //{
+        //    return Ok(await _context.Projects.ToListAsync());
+        //}
+        public async Task<List<Project>> GetInvoicesAsync()
         {
-            return Ok(await _context.Projects.ToListAsync());
+            return await _context.Projects
+                .Include(i => i.Customers)
+                .ToListAsync();
         }
+
 
         [HttpGet("{id:int}")]
 
         public async Task<IActionResult> Get(int id)
         {
-            var project = await _context.Projects.SingleOrDefaultAsync(x => x.Id == id);
+            var project = await _context.Projects
+            .Include(i => i.Customers)
+            .SingleOrDefaultAsync(x => x.Id == id);
 
             if (project == null)
             {
@@ -57,16 +67,11 @@ namespace DesarrolloTec.API.Controllers
         }
 
         [HttpPut]
-
         public async Task<IActionResult> Put(Project project)
         {
-            _context.Projects.Add(project);
+            _context.Projects.Update(project);
             await _context.SaveChangesAsync();
-
-            return Ok( new
-            { message = "Proyecto Actualizado con éxito.",
-              data = project
-            });
+            return Ok( project);
         }
 
         [HttpDelete("{id:int}")]

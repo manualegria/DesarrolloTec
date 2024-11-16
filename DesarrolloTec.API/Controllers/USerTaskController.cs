@@ -19,10 +19,16 @@ namespace DesarrolloTec.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> Get()
+        public async Task<List<USerTask>> GetInvoicesAsync()
         {
-            return Ok(await _context.USerTasks.ToArrayAsync());
+            var tasks = await _context.USerTasks
+                .Include(t => t.Projects)
+                .Include(t => t.Employees)
+                .ToListAsync();
+
+            return tasks; 
         }
+
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult> Get(int id)
@@ -65,24 +71,22 @@ namespace DesarrolloTec.API.Controllers
 
         }
 
-        [HttpDelete("{id:int}")]
 
+        [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var delete = await _context.USerTasks
-                .Where(x => x.Id == id)
-            .ExecuteDeleteAsync();
-
-            if (delete == 0)
+            var task = await _context.USerTasks.FindAsync(id);
+            if (task == null)
             {
                 return NotFound(new { message = "Tarea no encontrada." });
+            }
 
-            }
-            else
-            {
-                return Ok(new { message = "Tarea eliminada con éxito." });
-            }
+            _context.USerTasks.Remove(task);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Tarea eliminada con éxito." });
         }
+
     }
 }
 
