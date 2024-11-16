@@ -1,0 +1,73 @@
+﻿@page "/customer/edit/{id:int}"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using DesarrolloTec.Shered.Entities
+@using DesarrolloTec.WEB.Repositories
+
+@inject NavigationManager navigationManager
+@inject IRepository repository
+@inject SweetAlertService swal
+
+
+@if (Customer is null)
+{  
+    <p>Cargando ...</p>
+}
+else
+{
+    <CustomerForm @ref="CustomerForm" Customer="Customer" OnSubmit="Edit" ReturnAction="Return" />
+
+}
+
+
+
+@code {
+
+    private Customer Customer;
+    private CustomerForm CustomerForm;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var responseHTTP = await repository.GetAsync<Customer>($"api/customers/{Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("customers");
+            }
+            else
+            {
+                var messageError = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", messageError, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            Customer = responseHTTP.Response;
+        }
+    }
+
+    private async Task Edit()
+    {
+        var responseHTTP = await repository.PutAsync("api/customers", Customer);
+
+        if (responseHTTP.Error)
+        {
+            var mensajeError = await responseHTTP.GetErrorMessageAsync();
+            await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+        }
+        else
+        {
+            CustomerForm!.FormPostedSuccessfully = true;
+            navigationManager.NavigateTo("/customers");
+        }
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("/customers");
+    }
+}

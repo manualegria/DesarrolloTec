@@ -1,0 +1,36 @@
+﻿@page "/customer/create"
+@using DesarrolloTec.Shared.Entities
+@using CurrieTechnologies.Razor.SweetAlert2
+
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService swal
+
+
+<h3>Crear Cliente</h3>
+<CustomerForm @ref="customerForm" Customer="Customer" OnSubmit="Create" ReturnAction="Return" />
+
+@code {
+    private Customer Customer = new();
+    private CustomerForm customerForm;
+
+    private async Task Create()
+    {
+        var responseHttp = await repository.PostAsync("/api/customers", Customer);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await swal.FireAsync("Error", message, SweetAlertIcon.Error);        
+        }
+        else
+        {
+            await swal.FireAsync("Éxito", "El servicio se ha creado correctamente.");
+            navigationManager.NavigateTo("/customers");
+        }
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("/customers");
+    }
+}
