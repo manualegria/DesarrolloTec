@@ -1,0 +1,43 @@
+﻿@page "/invoice/create"
+@using DesarrolloTec.Shared.Entities
+@using CurrieTechnologies.Razor.SweetAlert2
+
+
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService swal
+
+
+<h3>Crear Servicio</h3>
+
+<InvoiceForm @ref="invoiceForm" Invoice="Invoice" OnSubmit="Create" ReturnAction="Return" />
+
+@code {
+    private Invoice Invoice = new();
+    private InvoiceForm invoiceForm;
+ 
+
+    private async Task Create()
+    {
+
+
+        var responseHttp = await repository.PostAsync("/api/invoices", Invoice);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await swal.FireAsync("Error", message, SweetAlertIcon.Error);
+          
+        }
+        else
+        {
+
+            await swal.FireAsync("Éxito", "El servicio se ha creado correctamente.");
+            navigationManager.NavigateTo("/invoices");
+        }
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("/invoices");
+    }
+}

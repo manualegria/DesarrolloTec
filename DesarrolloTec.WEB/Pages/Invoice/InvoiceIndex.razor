@@ -1,0 +1,125 @@
+﻿@page "/invoices"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using DesarrolloTec.Shared.Entities
+@using DesarrolloTec.Shered.Entities
+@using DesarrolloTec.WEB.Repositories
+@using DesarrolloTec.WEB.Shared
+
+
+
+@inject IRepository repository 
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+
+
+<div class="mb-3">
+
+
+    <a class="btn btn-primary " href="/invoice/create">Crear Factura</a>
+
+</div>
+
+<GenericList MyList="Invoices">
+
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Fecha de espedición</th>
+                    <th>Estado del pago</th>
+                    <th>Cliente</th>
+                    <th>Proyecto</th>
+                    <th>Monto total</th>
+                   
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var invoice in Invoices!)
+                {
+                    <tr>
+                        
+                        <td> @invoice.DateIssued </td>
+                        <td>@invoice.PaymentStatus</td>
+                        <td>@invoice.Customers?.Name </td> 
+                        <td>@invoice.Projects?.Name </td>
+                        <td> @invoice.TotalAmount</td>
+
+
+                        <td>
+                            <a href="/invoice/edit/@invoice.Id" class="btn btn-warning">Editar</a>
+                            <button class="btn btn-danger" @onclick=@(()=>DeleteAsync(invoice))>Borrar</button>
+                          @*   <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(service))><i class="oi oi-trash" /> Borrar</button> *@
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </Body>
+ 
+</GenericList>
+
+
+<script>
+    window.disableUnloadWarning = function () {
+        window.onbeforeunload = null; // Deshabilitar la alerta de salida
+    };
+</script>
+
+
+
+@code {
+
+
+    public List<Invoice> Invoices { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var responseHppt = await repository.GetAsync<List<Invoice>>("/api/invoices");
+        Invoices = responseHppt.Response!;
+    }
+
+    private async Task DeleteAsync(Invoice Invoice)
+    {
+        var result = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Esta seguro que quieres borrar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHTTP = await repository.DeleteAsync($"api/invoices/{Invoice.Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var mensajeError = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            await Load();
+        }
+    }
+}
