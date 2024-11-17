@@ -29,7 +29,7 @@ namespace DesarrolloTec.Shared.Entities
         [Required(ErrorMessage = "El {0} es obligatorio")]
         public string Description { get; set; }
 
-        [JsonIgnore]
+        
         public Project Projects { get; set; }
         public int ProjectId { get; set; }
 

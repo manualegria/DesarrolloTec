@@ -26,11 +26,11 @@ namespace DesarrolloTec.Shared.Entities
         [Required(ErrorMessage = "El {0} es obligatorio")]
         public string PaymentStatus { get; set; }
 
-        [JsonIgnore]
+      
         public Customer Customers { get; set; }
         public int CustomerId { get; set; }
 
-        [JsonIgnore]
+        
         public Project Projects { get; set; }
         public int ProjectId { get; set; }
 

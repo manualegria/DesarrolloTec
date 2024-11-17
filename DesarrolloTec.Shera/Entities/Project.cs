@@ -54,8 +54,6 @@ namespace DesarrolloTec.Shered.Entities
         public ICollection<ProjectService> ProjectServices { get; set; }
 
         // Recibe foranea de customer
-
-        [JsonIgnore]
         public Customer Customers { get; set; }
         public int CustomerId { get; set; }
 

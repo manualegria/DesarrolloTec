@@ -26,7 +26,7 @@ namespace DesarrolloTec.Shered.Entities
 
 
         [Display(Name = "Cargo del empleado")]
-        [MaxLength(10, ErrorMessage = "El {0}, no puede tener mas de 10 caractere.")]
+        [MaxLength(50, ErrorMessage = "El {0}, no puede tener mas de 10 caractere.")]
         [Required(ErrorMessage = "El {0} es obligatorio")]
         public string Position { get; set; }
 

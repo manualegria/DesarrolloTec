@@ -35,11 +35,11 @@ namespace DesarrolloTec.Shared.Entities
         [Required(ErrorMessage = "El {0} es obligatorio")]
         public TaskStatus Status { get; set; }
 
-        [JsonIgnore]
+       
         public Project Projects { get; set; }
         public int ProjectId { get; set; }
 
-        [JsonIgnore]
+       
         public Employee Employees { get; set; }
         public int EmployeeId { get; set; }
     }
