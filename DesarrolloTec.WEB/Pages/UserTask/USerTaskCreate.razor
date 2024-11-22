@@ -1,9 +1,11 @@
-﻿@page "/task/create"
+﻿
+@page "/task/create"
 @using DesarrolloTec.Shared.Entities
 
 @inject IRepository repository
 @inject NavigationManager navigationManager
 @inject SweetAlertService sweetAlertService
+@inject SweetAlertService swal
 
 <h3> Crear Tarea</h3>
 
@@ -20,10 +22,14 @@
         {
             var message = await responseHttp.GetErrorMessageAsync();
             await sweetAlertService.FireAsync("Error", message);
-            return;
+        }  
+        else{
+
+            userTaskForm!.FormPostedSuccessfully = true;
+            await swal.FireAsync("Éxito", "El Empleado se ha creado correctamente.");
+             navigationManager.NavigateTo("/tasks");
         }
 
-        navigationManager.NavigateTo("/tasks");
     }
 
     private void Return()
