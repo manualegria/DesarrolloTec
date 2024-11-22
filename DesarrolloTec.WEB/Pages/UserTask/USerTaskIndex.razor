@@ -43,26 +43,29 @@
             <tbody>
                 @foreach (var task in filteredUsertasks!)
                 {
-                    <tr>
-
-                       
+                    var isOverdue = task.DeadlineDate < DateTime.Now;
+                      <!-- Validación de fecha -->
+                    <tr class="@((isOverdue ? "table-danger" : ""))">
+                        <!-- Aplicar clase si la tarea está vencida -->
                         <td>@task.Description</td>
-                        <td> @task.AssignmateDate</td>
-                        <td> @task.DeadlineDate</td>
-                        <td> @task.Status</td>
-                        <td> @task.Projects?.Name</td>
-                        <td> @task.Employees?.FullName</td>
-
-
+                        <td>@task.AssignmateDate</td>
+                        <td>@task.DeadlineDate</td>
+                        <td>@task.Status</td>
+                        <td>@task.Projects?.Name</td>
+                        <td>@task.Employees?.FullName</td>
                         <td>
-                            <a href="/task/edit/@task.Id" class="btn btn-warning">Editar</a>
-                            <button class="btn btn-danger" @onclick=@(()=>DeleteAsync(task))>Borrar</button>
-                            @*   <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(service))><i class="oi oi-trash" /> Borrar</button> *@
-                        </td>
+                            @if (isOverdue)
+                            {
+                                <span class="text-danger mr-3">Vencida</span>  <!-- Mensaje de vencida -->
+                            }
 
+                            <a href="/task/edit/@task.Id" class="btn btn-warning">Editar</a>
+                            <button class="btn btn-danger" @onclick="@(() => DeleteAsync(task))">Borrar</button>
+                        </td>
                     </tr>
                 }
             </tbody>
+
         </table>
 
     </Body>
