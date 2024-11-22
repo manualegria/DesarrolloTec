@@ -1,0 +1,40 @@
+﻿@* @page "/recover-password"
+
+@using DesarrolloTec.Shared.DTOs
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+
+<h3>Recuperar Contraseña</h3>
+
+<EditForm Model="recoverPasswordDTO" OnValidSubmit="SubmitAsync">
+    <DataAnnotationsValidator />
+    <div class="form-container">
+        <div class="mb-3">
+            <label for="email">Email:</label>
+            <InputText id="email" class="form-control" @bind-Value="recoverPasswordDTO.Email" />
+            <ValidationMessage For="@(() => recoverPasswordDTO.Email)" />
+        </div>
+
+        <button class="btn btn-primary" type="submit">Enviar Instrucciones</button>
+    </div>
+</EditForm>
+
+@code {
+    private RecoverPasswordDTO recoverPasswordDTO = new();
+
+    private async Task SubmitAsync()
+    {
+        var response = await repository.PostAsync("/api/accounts/RecoverPassword", recoverPasswordDTO);
+
+        if (response.Error)
+        {
+            var message = await response.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+        }
+        else
+        {
+            await sweetAlertService.FireAsync("Éxito", "Se han enviado las instrucciones a tu correo.", SweetAlertIcon.Success);
+        }
+    }
+}
+ *@

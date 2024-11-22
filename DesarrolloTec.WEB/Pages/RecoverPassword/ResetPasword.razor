@@ -1,0 +1,56 @@
+﻿@* @page "/reset-password"
+
+@using DesarrolloTec.Shared.DTOs
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
+<h3>Restablecer Contraseña</h3>
+
+<EditForm Model="resetPasswordDTO" OnValidSubmit="SubmitAsync">
+    <DataAnnotationsValidator />
+    <div class="form-container">
+        <div class="mb-3">
+            <label for="newPassword">Nueva Contraseña:</label>
+            <InputText id="newPassword" type="password" class="form-control" @bind-Value="resetPasswordDTO.NewPassword" />
+            <ValidationMessage For="@(() => resetPasswordDTO.NewPassword)" />
+        </div>
+        <div class="mb-3">
+            <label for="confirmPassword">Confirmar Contraseña:</label>
+            <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="resetPasswordDTO.ConfirmPassword" />
+            <ValidationMessage For="@(() => resetPasswordDTO.ConfirmPassword)" />
+        </div>
+
+        <button class="btn btn-primary" type="submit">Restablecer Contraseña</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public string Token { get; set; } = null!;
+    [Parameter] public string Email { get; set; } = null!;
+
+    private ResetPasswordDTO resetPasswordDTO = new();
+
+    protected override void OnInitialized()
+    {
+        resetPasswordDTO.Token = Token;
+        resetPasswordDTO.Email = Email;
+    }
+
+    private async Task SubmitAsync()
+    {
+        var response = await repository.PostAsync("/api/accounts/ResetPassword", resetPasswordDTO);
+
+        if (response.Error)
+        {
+            var message = await response.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+        }
+        else
+        {
+            await sweetAlertService.FireAsync("Éxito", "Contraseña restablecida correctamente.", SweetAlertIcon.Success);
+            navigationManager.NavigateTo("/login");
+        }
+    }
+}
+ *@
