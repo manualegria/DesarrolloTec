@@ -1,0 +1,179 @@
+﻿@page "/Register"
+
+@using DesarrolloTec.Shared.Enums;
+@using DesarrolloTec.WEB.AuthenticationProviders;
+@using DesarrolloTec.WEB.Pages.Auth
+@using Veterinary.Shared.DTOs
+@using Veterinary.WEB.Auth
+
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+@inject ILoginService loginService
+
+
+<EditForm Model="userDTO" OnValidSubmit="CreateUserAsync">
+    <DataAnnotationsValidator />
+
+    <div class="card">
+        <div class="card-header">
+            <span>
+                <i class="oi oi-person" /> Registrar Nuevo Usuario
+            </span>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-6">
+                    <!-- Campos del formulario aquí -->
+                    <div class="mb-3">
+                        <label>Documento:</label>
+                        <div>
+                            <InputText width="10" @bind-Value="userDTO.Document" />
+                            <ValidationMessage For="@(() => userDTO.Document)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Nombres:</label>
+                        <div>
+                            <InputText width="10" @bind-Value="userDTO.FirstName" />
+                            <ValidationMessage For="@(() => userDTO.FirstName)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Apellidos:</label>
+                        <div>
+                            <InputText width="10" @bind-Value="userDTO.LastName" />
+                            <ValidationMessage For="@(() => userDTO.LastName)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Teléfono:</label>
+                        <div>
+                            <InputText width="10" @bind-Value="userDTO.PhoneNumber" />
+                            <ValidationMessage For="@(() => userDTO.PhoneNumber)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Email:</label>
+                        <div>
+                            <InputText width="10" @bind-Value="userDTO.Email" />
+                            <ValidationMessage For="@(() => userDTO.Email)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Foto:</label>
+                        <div>
+                            <InputText width="10" @bind-Value="userDTO.Photo" />
+                            <ValidationMessage For="@(() => userDTO.Photo)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Contraseña:</label>
+                        <div>
+                            <InputText type="password" width="10" @bind-Value="userDTO.Password" />
+                            <ValidationMessage For="@(() => userDTO.Password)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Confirmación de contraseña:</label>
+                        <div>
+                            <InputText type="password" width="10" @bind-Value="userDTO.PasswordConfirm" />
+                            <ValidationMessage For="@(() => userDTO.PasswordConfirm)" />
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <!-- Botón Registrar al final del formulario -->
+            <div class="mt-3">
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-person-add" /> Registrar
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+<style>
+    /* Estilos para el contenedor del login */
+    .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f8f9fa;
+    padding: 0 1rem;
+    }
+
+    /* Caja de login */
+    .login-box {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 100%;
+    }
+
+    /* Inputs */
+    .form-control {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    }
+
+    /* Botón de login */
+    .btn-login {
+    width: 100%;
+    margin-top: 1rem;
+    }
+
+</style>
+
+
+@code {
+    private UserDTO userDTO = new();
+
+    //UserDTO
+    // {
+    //     UserType = UserType.User // Tipo de usuario por defecto
+    // };
+
+    private string imageUrl;
+
+
+    private async Task CreateUserAsync()
+    {
+        userDTO.UserName = userDTO.Email;
+        userDTO.UserType = UserType.User;
+
+        var responseHttp = await repository.PostAsync<UserDTO>("/api/accounts/CreateUser", userDTO);
+
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        await sweetAlertService.FireAsync("Confirmación", "Su cuenta ha sido creada con éxito. Se te ha enviado un correo electrónico con las instrucciones para activar tu usuario.", SweetAlertIcon.Info);
+
+        navigationManager.NavigateTo("/");
+    }
+
+    private void CancelRegistration()
+    {
+        // Navega a la página de inicio o la página que desees (ej. Welcome).
+        navigationManager.NavigateTo("/");
+    }
+}

@@ -1,0 +1,86 @@
+﻿@page "/Login"
+
+@using Veterinary.Shared.DTOs;
+@using Veterinary.WEB.Auth;
+
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+@inject ILoginService loginService
+
+<div class="login-container">
+    <div class="login-box">
+        <h3>Iniciar Sesión</h3>
+        <EditForm Model="loginDTO" OnValidSubmit="LoginAsync">
+            <DataAnnotationsValidator />
+            <div class="mb-3">
+                <label for="email">Email:</label>
+                <InputText id="email" class="form-control" @bind-Value="@loginDTO.Email" />
+                <ValidationMessage For="@(() => loginDTO.Email)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="password">Contraseña:</label>
+                <InputText type="password" id="password" class="form-control" @bind-Value="@loginDTO.Password" />
+                <ValidationMessage For="@(() => loginDTO.Password)" />
+            </div>
+
+            <button class="btn btn-primary btn-login" type="submit">Iniciar Sesión</button>
+        </EditForm>
+    </div>
+</div>
+
+<style>
+    /* Estilos para el contenedor del login */
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f8f9fa;
+        padding: 0 1rem;
+    }
+
+    /* Caja de login */
+    .login-box {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        max-width: 400px;
+        width: 100%;
+    }
+
+    /* Inputs */
+    .form-control {
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+        padding: 10px;
+    }
+
+    /* Botón de login */
+    .btn-login {
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+   
+</style>
+
+@code {
+    private LoginDTO loginDTO = new();
+
+    private async Task LoginAsync()
+    {
+        var responseHttp = await repository.PostAsync<LoginDTO, TokenDTO>("/api/accounts/Login", loginDTO);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        await loginService.LoginAsync(responseHttp.Response!.Token);
+        navigationManager.NavigateTo("/");
+    }
+}
