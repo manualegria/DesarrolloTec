@@ -1,7 +1,153 @@
-﻿@page "/"
+﻿
+@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@using DesarrolloTec.Shered.Entities
+@using DesarrolloTec.WEB.Repositories
+@using DesarrolloTec.WEB.Shared
+@using CurrieTechnologies.Razor.SweetAlert2
 
-<PageTitle>Home</PageTitle>
+@inject SweetAlertService swal
+@inject IRepository repository
+@inject NavigationManager navigationManager
 
-<h1>Hello, world!</h1>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css" />
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css" />
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+<div>
 
-Welcome to your new app.
+    <h2>Servicios que ofrecemos</h2>
+
+    @if (Services == null)
+    {
+        <p>Cargando servicios...</p>
+    }
+    else
+    {
+        <div class="slider-container">
+            <div class="slider">
+                @foreach (var service in Services)
+                {
+                    <div class="service">
+                        <h3>@service.Name</h3>
+                        <p>@service.Description</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="company-info">
+        <h2>Información sobre la Empresa</h2>
+        <p>¿Quiénes somos?</p>
+        <p>Somos una empresa dedicada al desarrollo de software a medida. Ofrecemos soluciones innovadoras para empresas de todos los tamaños, ayudándolas a mejorar su eficiencia y productividad mediante aplicaciones personalizadas.</p>
+    </div>
+</div>
+
+<div class="footer-divider"></div>
+
+<div class="footer">
+    <p>Contacto: <a href="mailto:contacto@desarrollotec.com">contacto@desarrollotec.com</a></p>
+    <p>Teléfono: +1 (234) 567-890</p>
+    <p>
+        Redes Sociales:
+        <a href="https://facebook.com">Facebook</a> |
+        <a href="https://instagram.com">Instagram</a> |
+        <a href="https://twitter.com">Twitter</a>
+    </p>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.slider').slick({
+            dots: true,
+            infinite: true,
+            speed: 500,
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 2000,
+        });
+    });
+</script>
+
+<style>
+    .slider-container {
+        background-image: url('/fondo.png');
+        background-size: cover;
+        background-position: center;
+        padding: 40px 0;
+    }
+
+    .slider {
+        width: 80%;
+        margin: 0 auto;
+    }
+
+        .slider .service {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+    .company-info {
+        text-align: center;
+        margin: 40px 0;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+        .company-info h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .company-info p {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+    .footer-divider {
+        border-top: 1px solid #d3d3d3; /* Línea gris clara */
+        margin: 20px 0;
+    }
+
+    .footer {
+        background-color: #f2f2f2;
+        color: #333;
+        text-align: center;
+        padding: 10px 0;
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        margin-top: 20px; /* Asegura espacio entre el contenido y el footer */
+    }
+
+        .footer a {
+            color: #333;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+
+            .footer a:hover {
+                text-decoration: underline;
+            }
+</style>
+
+@code {
+    public List<Service> Services { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadServices();
+    }
+
+    private async Task LoadServices()
+    {
+        // Aquí cargas los servicios desde tu repositorio, lo que ya tienes funcionando.
+        var responseHttp = await repository.GetAsync<List<Service>>("/api/services");
+        Services = responseHttp.Response!;
+    }
+}
+
