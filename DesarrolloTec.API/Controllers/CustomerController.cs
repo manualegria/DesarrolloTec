@@ -1,10 +1,13 @@
 ﻿using DesarrolloTec.API.Data;
 using DesarrolloTec.Shered.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DesarrolloTec.API.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
     [ApiController]
     [Route("api/customers")]
@@ -16,7 +19,7 @@ namespace DesarrolloTec.API.Controllers
             _context = context;
         }
 
-
+        //[AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult> Get() 
         {
@@ -42,6 +45,7 @@ namespace DesarrolloTec.API.Controllers
 
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult> Post(Customer customer)
         {

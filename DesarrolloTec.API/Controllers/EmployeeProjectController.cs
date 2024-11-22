@@ -1,11 +1,13 @@
 ﻿using DesarrolloTec.API.Data;
 using DesarrolloTec.Shered.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DesarrolloTec.API.Controllers
 {
-
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     [Route("/api/employeeProject")]
     public class EmployeeProjectController : ControllerBase

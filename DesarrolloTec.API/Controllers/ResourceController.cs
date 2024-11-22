@@ -1,10 +1,14 @@
 ﻿using DesarrolloTec.API.Data;
 using DesarrolloTec.Shared.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DesarrolloTec.API.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+
     [ApiController]
     [Route("/api/resources")]
     public class ResourceController : ControllerBase

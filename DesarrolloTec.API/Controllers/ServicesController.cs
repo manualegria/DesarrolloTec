@@ -1,12 +1,15 @@
 ﻿using DesarrolloTec.API.Data;
 using DesarrolloTec.Shered.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DesarrolloTec.API.Controllers
 {
-   
-     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+
+    [ApiController]
      [Route("/api/services")]
 
      public class ServiceController : ControllerBase
@@ -18,6 +21,7 @@ namespace DesarrolloTec.API.Controllers
                 _context = context;
             }
 
+        [AllowAnonymous]
             [HttpGet]
             public async Task<ActionResult> Get()
             {
