@@ -1,0 +1,32 @@
+﻿@page "/welcome"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<h3>Bienvenido a Nuestra Plataforma</h3>
+
+<div class="d-flex justify-content-center mt-4">
+    <div class="card p-4" style="width: 300px;">
+        <div class="card-body text-center">
+            <h5 class="card-title">Elige una opción</h5>
+            <p class="card-text">Regístrate o inicia sesión para acceder a todas las funcionalidades.</p>
+            <a class="btn btn-primary mb-2" href="/Login">Iniciar Sesión</a>
+            <a class="btn btn-secondary" href="/Register">Registrarse</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool isAuthenticated = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = authState.User.Identity.IsAuthenticated;
+
+        if (isAuthenticated)
+        {
+            // Si el usuario está autenticado, redirige al Home
+            NavigationManager.NavigateTo("/home");
+        }
+    }
+}
