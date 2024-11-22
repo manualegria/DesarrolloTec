@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using DesarrolloTec.Shered.Entities;
 using DesarrolloTec.Shared.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Veterinary.Shared.Entities;
 
 namespace DesarrolloTec.API.Data
 {
-    public class DataContext:DbContext
+    public class DataContext:IdentityDbContext<User>
     {
 
         public DataContext(DbContextOptions<DataContext> options) : base(options) 
