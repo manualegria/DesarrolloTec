@@ -1,0 +1,124 @@
+﻿@page "/employeeprojects"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using DesarrolloTec.Shared.Entities
+@using DesarrolloTec.WEB.Repositories
+@using DesarrolloTec.WEB.Shared
+
+@inject IRepository repository
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+
+<div class="mb-3">
+    <a class="btn btn-primary" href="/employeeproject/create">Asignar Proyecto a Empleado</a>
+</div>
+
+<div class="mb-3">
+    <input type="text" @bind="searchTerm" placeholder="Buscar por Nombre de Proyecto o Empleado" class="form-control" />
+    <button class="btn btn-secondary mt-2" @onclick="Search">Buscar</button>
+    <button class="btn btn-outline-secondary mt-2" @onclick="ClearSearch">Limpiar</button>
+</div>
+
+<GenericList MyList="filteredEmployeeProjects">
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Empleado</th>
+                    <th>Proyecto</th>
+                    <th>Fecha de asignación</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var employeeProject in filteredEmployeeProjects!)
+                {
+                    <tr>
+                        <td>@employeeProject.Employees.FullName</td>
+                        <td>@employeeProject.Projects.Name</td>
+                        <td>@employeeProject.AssignedDate.ToShortDateString()</td>
+                        <td>
+                            <a href="/employeeproject/edit/@employeeProject.Id" class="btn btn-warning">Editar</a>
+                            <button class="btn btn-danger" @onclick="@(() => DeleteAsync(employeeProject))">Borrar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </Body>
+</GenericList>
+
+@code {
+    public List<EmployeeProject> EmployeeProjects { get; set; }
+    public List<EmployeeProject> filteredEmployeeProjects { get; set; }
+    private string searchTerm = string.Empty;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var responseHttp = await repository.GetAsync<List<EmployeeProject>>("/api/employeeProject");
+        EmployeeProjects = responseHttp.Response ?? new List<EmployeeProject>();
+        filteredEmployeeProjects = new List<EmployeeProject>(EmployeeProjects);
+    }
+
+    private void Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredEmployeeProjects = new List<EmployeeProject>(EmployeeProjects);
+        }
+        else
+        {
+            filteredEmployeeProjects = EmployeeProjects
+                .Where(ep => ep.Projects.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                             ep.Employees.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        filteredEmployeeProjects = new List<EmployeeProject>(EmployeeProjects);
+    }
+
+    private async Task DeleteAsync(EmployeeProject employeeProject)
+    {
+        var result = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Está seguro que desea borrar esta asignación?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHttp = await repository.DeleteAsync($"api/employeeProject/{employeeProject.Id}");
+
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var errorMessage = await responseHttp.GetErrorMessageAsync();
+                await swal.FireAsync("Error", errorMessage, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            await Load();
+        }
+    }
+}
