@@ -69,20 +69,17 @@
         // Cargar proyectos y empleados desde el repositorio
         var projectResponse = await repository.GetAsync<List<Project>>("/api/projects");
 
-
         if (projectResponse.Response != null)
         {
             projects = projectResponse.Response;
         }
 
-       
     }
 
 
     [EditorRequired]
     [Parameter]
     public Resource Resource { get; set; }
-
 
     [EditorRequired]
     [Parameter]
@@ -93,38 +90,36 @@
 
     public EventCallback ReturnAction { get; set; }
 
-
     public bool FormPostedSuccessfully { get; set; } = false;
+
 
     private async Task OnBeforeInternalNavigation(LocationChangingContext context)
     {
         var formWasEdited = editContext.IsModified();
 
-        if (!formWasEdited)
+        if (!formWasEdited && !FormPostedSuccessfully)
         {
-            return;
-        }
 
-        if (FormPostedSuccessfully)
-        {
-            return;
-        }
+            var result = await swal.FireAsync(new SweetAlertOptions
+                {
+                    Title = "Confirmación",
+                    Text = "¿Deseas abandonar la página y perder los cambios?",
+                    Icon = SweetAlertIcon.Warning,
+                    ShowCancelButton = true
+                });
 
-        var result = await swal.FireAsync(new SweetAlertOptions
+            var confirm = !string.IsNullOrEmpty(result.Value);
+
+            if (confirm)
             {
-                Title = "Confirmación",
-                Text = "¿Deseas abandonar la página y perder los cambios?",
-                Icon = SweetAlertIcon.Warning,
-                ShowCancelButton = true
-            });
+                context.PreventNavigation();
 
-        var confirm = !string.IsNullOrEmpty(result.Value);
-
-        if (confirm)
-        {
-            return;
+            }
         }
+    }
 
-        context.PreventNavigation();
+    public void ResetFormPostedSuccessfully()
+    {
+        FormPostedSuccessfully = false;
     }
 }

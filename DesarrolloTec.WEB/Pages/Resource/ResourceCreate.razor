@@ -24,7 +24,9 @@
         }
         else
         {
-            await swal.FireAsync("Éxito", "El servicio se ha creado correctamente.");
+
+            resourceForm!.FormPostedSuccessfully = true;
+            await swal.FireAsync("Éxito", "El Recurso se ha creado correctamente.");
             navigationManager.NavigateTo("/resources");
         }
     }
