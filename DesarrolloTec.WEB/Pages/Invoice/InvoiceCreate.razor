@@ -30,8 +30,8 @@
         }
         else
         {
-
-            await swal.FireAsync("Éxito", "El servicio se ha creado correctamente.");
+            invoiceForm!.FormPostedSuccessfully = true;
+            await swal.FireAsync("Éxito", "La Factura se ha creado correctamente.");
             navigationManager.NavigateTo("/invoices");
         }
     }

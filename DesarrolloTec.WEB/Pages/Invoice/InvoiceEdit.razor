@@ -47,6 +47,7 @@ else
             }
             else
             {
+                InvoiceForm!.FormPostedSuccessfully = true;
                 var messageError = await responseHTTP.GetErrorMessageAsync();
                 await swal.FireAsync("Error", messageError, SweetAlertIcon.Error);
             }
