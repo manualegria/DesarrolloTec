@@ -21,8 +21,6 @@ else
 {
     <ProjectForm @ref="ProjectForm" Project="Project" OnSubmit="Edit" ReturnAction="Return" />
 
-
-
 }
 
 
@@ -43,10 +41,12 @@ else
         {
             if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                navigationManager.NavigateTo("projects");
+                
             }
             else
             {
+
+
                 var messageError = await responseHTTP.GetErrorMessageAsync();
                 await swal.FireAsync("Error", messageError, SweetAlertIcon.Error);
             }

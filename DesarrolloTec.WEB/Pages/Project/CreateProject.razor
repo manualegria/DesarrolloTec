@@ -4,6 +4,7 @@
 @inject IRepository repository
 @inject NavigationManager navigationManager
 @inject SweetAlertService sweetAlertService
+@inject SweetAlertService swal
 
 <h3>Projecto Create</h3>
 
@@ -19,11 +20,15 @@
         if (responseHttp.Error)
         {
             var message = await responseHttp.GetErrorMessageAsync();
-            await sweetAlertService.FireAsync("Error", message);
-            return;
+            await swal.FireAsync("Error", message, SweetAlertIcon.Error);
+        }
+        else {
+
+            projectForm!.FormPostedSuccessfully = true;
+            await swal.FireAsync("Éxito", "El cliente se ha creado correctamente.");
+            navigationManager.NavigateTo("/projects");
         }
 
-        navigationManager.NavigateTo("/projects");
     }
 
     private void Return()
