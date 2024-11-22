@@ -22,9 +22,17 @@ namespace DesarrolloTec.API.Controllers
 
         [HttpGet]
 
-        public async Task<IActionResult> Get()
+        //public async Task<IActionResult> Get()
+        //{
+        //    return Ok(await _context.EmployeeProjects.ToListAsync());
+        //}
+
+        public async Task<List<EmployeeProject>> GetInvoicesAsync()
         {
-            return Ok(await _context.EmployeeProjects.ToListAsync());
+            return await _context.EmployeeProjects
+                .Include(i => i.Projects)
+                .Include(i => i.Employees)
+                .ToListAsync();
         }
 
 
