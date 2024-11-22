@@ -1,0 +1,91 @@
+﻿@page "/users"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using Veterinary.Shared.DTOs
+@using DesarrolloTec.WEB.Repositories
+@inject IRepository repository
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+
+<div class="mb-3">
+    <a class="btn btn-primary" href="/Register">Crear Usuario</a>
+</div>
+
+<GenericList MyList="Users">
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Users!)
+                {
+                    <tr>
+                        <td>@user.Document</td>
+                        <td>@user.FirstName</td>
+                        <td>@user.LastName</td>
+                        <td>@user.UserType</td>
+                        <td>
+                            <a href="/edituser/@user.Id" class="btn btn-warning">Editar</a>
+                            <button class="btn btn-danger" @onclick=@(() => DeleteAsync(user))>Borrar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </Body>
+</GenericList>
+
+@code {
+    public List<UserDTO> Users { get; set; } = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadUsersAsync();
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        var responseHttp = await repository.GetAsync<List<UserDTO>>("/api/accounts");
+        if (!responseHttp.Error)
+        {
+            Users = responseHttp.Response!;
+        }
+        else
+        {
+            var errorMessage = await responseHttp.GetErrorMessageAsync();
+            await swal.FireAsync("Error", $"No se pudo cargar la lista de usuarios: {errorMessage}", SweetAlertIcon.Error);
+        }
+    }
+
+    private async Task DeleteAsync(UserDTO user)
+    {
+        var result = await swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "Confirmación",
+            Text = $"¿Está seguro que desea eliminar al usuario {user.FirstName}?",
+            Icon = SweetAlertIcon.Question,
+            ShowCancelButton = true
+        });
+
+        if (!string.IsNullOrEmpty(result.Value))
+        {
+            var responseHttp = await repository.DeleteAsync($"/api/accounts/DeleteUser/{user.Id}");
+            if (responseHttp.Error)
+            {
+                var errorMessage = await responseHttp.GetErrorMessageAsync();
+                await swal.FireAsync("Error", $"No se pudo eliminar al usuario: {errorMessage}", SweetAlertIcon.Error);
+            }
+            else
+            {
+                await swal.FireAsync("Éxito", "El usuario ha sido eliminado correctamente", SweetAlertIcon.Success);
+                await LoadUsersAsync();
+            }
+        }
+    }
+}

@@ -1,0 +1,113 @@
+﻿@page "/edituser/{UserId}"
+@using Veterinary.Shared.DTOs
+@using DesarrolloTec.Shared.Enums
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Editar Usuario</h3>
+
+<EditForm Model="@userDTO" OnValidSubmit="HandleValidSubmit" class="form-container">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="firstName">First Name</label>
+        <InputText id="firstName" @bind-Value="userDTO.FirstName" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <InputText id="lastName" @bind-Value="userDTO.LastName" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="document">Document</label>
+        <InputText id="document" @bind-Value="userDTO.Document" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="photo">Photo</label>
+        <InputText id="photo" @bind-Value="userDTO.Photo" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="userType">User Type</label>
+        <InputSelect id="userType" @bind-Value="userDTO.UserType" class="form-control">
+            @foreach (var userType in Enum.GetValues(typeof(UserType)))
+            {
+                <option value="@userType">@userType</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="button-group">
+        <button type="submit" class="btn btn-primary">Actualizar</button>
+        <button type="button" class="btn btn-secondary" @onclick="GoBack">Regrsar</button>
+    </div>
+</EditForm>
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+</style>
+
+@code {
+    [Parameter] public string UserId { get; set; }
+    private UserDTO userDTO = new UserDTO();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Obtener el usuario con el UserId y rellenar el formulario
+        var response = await Http.GetFromJsonAsync<UserDTO>($"api/accounts/{UserId}");
+        if (response != null)
+        {
+            userDTO = response;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        // Realiza la llamada a la API para actualizar el usuario
+        var response = await Http.PutAsJsonAsync($"api/accounts/EditUser/{UserId}", userDTO);
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/users"); // Redirige a la lista de usuarios
+        }
+        else
+        {
+            // Manejar error
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/users");
+    }
+}
