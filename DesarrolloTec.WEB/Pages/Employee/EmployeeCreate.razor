@@ -24,7 +24,8 @@
         }
         else
         {
-            await swal.FireAsync("Éxito", "El servicio se ha creado correctamente.");
+            employeeForm!.FormPostedSuccessfully = true;
+            await swal.FireAsync("Éxito", "El Empleado se ha creado correctamente.");
             navigationManager.NavigateTo("/employees");
         }
     }

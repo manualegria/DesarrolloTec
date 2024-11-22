@@ -6,11 +6,14 @@
 @inject NavigationManager navigationManager
 @inject SweetAlertService swal
 
-
 <h3>Crear Cliente</h3>
 <CustomerForm @ref="customerForm" Customer="Customer" OnSubmit="Create" ReturnAction="Return" />
 
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? From { get; set; } // Captura el parámetro de consulta
+
     private Customer Customer = new();
     private CustomerForm customerForm;
 
@@ -20,17 +23,23 @@
         if (responseHttp.Error)
         {
             var message = await responseHttp.GetErrorMessageAsync();
-            await swal.FireAsync("Error", message, SweetAlertIcon.Error);        
+            await swal.FireAsync("Error", message, SweetAlertIcon.Error);
         }
         else
         {
-            await swal.FireAsync("Éxito", "El servicio se ha creado correctamente.");
-            navigationManager.NavigateTo("/customers");
+
+             customerForm!.FormPostedSuccessfully = true;
+            await swal.FireAsync("Éxito", "El cliente se ha creado correctamente.");
+          //customerForm.ResetFormPostedSuccessfully();
+            navigationManager.NavigateTo("/customers"); // Regresa al índice de clientes por defecto
+            
         }
     }
 
     private void Return()
     {
+        
         navigationManager.NavigateTo("/customers");
+        
     }
 }
