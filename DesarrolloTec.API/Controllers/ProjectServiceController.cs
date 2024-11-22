@@ -39,12 +39,26 @@ namespace DesarrolloTec.API.Controllers
 
         [HttpGet]
 
+<<<<<<< HEAD
         public async Task<IActionResult> Get()
         {
 <<<<<<< HEAD
             return Ok(await _context.ProjectService.ToListAsync());
         }
+=======
+        //public async Task<IActionResult> Get()
+        //{
+        //    return Ok(await _context.ProjectService.ToListAsync());
+        //}
+>>>>>>> emirDev
 
+        public async Task<List<ProjectService>> GetInvoicesAsync()
+        {
+            return await _context.ProjectService
+                .Include(i => i.Projects)
+                .Include(i => i.Services)
+                .ToListAsync();
+        }
 
 =======
             return Ok(await _context.ProjectServices.ToListAsync());

@@ -1,0 +1,122 @@
+﻿@page "/projectservices"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using DesarrolloTec.Shared.Entities
+@using DesarrolloTec.Shered.Entities
+@using DesarrolloTec.WEB.Repositories
+
+@inject IRepository repository
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+
+<div class="mb-3">
+    <a class="btn btn-primary " href="/projectservice/create">Crear Relación</a>
+</div>
+
+<div class="mb-3">
+    <input type="text" @bind="searchTerm" placeholder="Buscar por Proyecto o Servicio" class="form-control" />
+    <button class="btn btn-secondary mt-2" @onclick="Search">Buscar</button>
+    <button class="btn btn-outline-secondary mt-2" @onclick="ClearSearch">Limpiar</button>
+</div>
+
+<GenericList MyList="filteredProjectServices">
+
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Proyecto</th>
+                    <th>Servicio</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ps in filteredProjectServices!)
+                {
+                    <tr>
+                        <td>@ps.Projects?.Name</td>
+                        <td>@ps.Services?.Name</td>
+                        <td>
+                            <a href="/projectservice/edit/@ps.Id" class="btn btn-warning">Editar</a>
+                            <button class="btn btn-danger" @onclick="@(() => DeleteAsync(ps))">Borrar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </Body>
+
+</GenericList>
+
+@code {
+    public List<ProjectService> ProjectServices { get; set; } = new();
+    public List<ProjectService> filteredProjectServices { get; set; } = new();
+    private string searchTerm = string.Empty;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var responseHTTP = await repository.GetAsync<List<ProjectService>>("/api/projectservices");
+        ProjectServices = responseHTTP.Response ?? new List<ProjectService>();
+        filteredProjectServices = new List<ProjectService>(ProjectServices);
+    }
+
+    private void Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredProjectServices = new List<ProjectService>(ProjectServices);
+        }
+        else
+        {
+            filteredProjectServices = ProjectServices
+                .Where(ps => (ps.Projects.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                              ps.Services.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+        }
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        filteredProjectServices = new List<ProjectService>(ProjectServices);
+    }
+
+    private async Task DeleteAsync(ProjectService projectService)
+    {
+        var result = await swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "Confirmación",
+            Text = "¿Estás seguro de que deseas borrar esta relación?",
+            Icon = SweetAlertIcon.Question,
+            ShowCancelButton = true
+        });
+
+        if (string.IsNullOrEmpty(result.Value))
+        {
+            return;
+        }
+
+        var responseHTTP = await repository.DeleteAsync($"api/projectServices/{projectService.Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var errorMessage = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", errorMessage, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            await Load();
+        }
+    }
+}

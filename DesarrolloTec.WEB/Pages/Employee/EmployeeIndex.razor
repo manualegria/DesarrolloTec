@@ -5,21 +5,21 @@
 @using DesarrolloTec.WEB.Repositories
 @using DesarrolloTec.WEB.Shared
 
-
-
-@inject IRepository repository 
+@inject IRepository repository
 @inject SweetAlertService swal
 @inject NavigationManager navigationManager
 
-
 <div class="mb-3">
-
-
-    <a class="btn btn-primary " href="/employee/create">Crear Empleado</a>
-
+    <a class="btn btn-primary" href="/employee/create">Crear Empleado</a>
 </div>
 
-<GenericList MyList="Employees">
+<div class="mb-3">
+    <input type="text" @bind="searchTerm" placeholder="Buscar por Nombre" class="form-control" />
+    <button class="btn btn-secondary mt-2" @onclick="Search">Buscar</button>
+    <button class="btn btn-outline-secondary mt-2" @onclick="ClearSearch">Limpiar</button>
+</div>
+
+<GenericList MyList="filteredEmployees">
 
     <Body>
         <table class="table table-striped">
@@ -27,44 +27,36 @@
                 <tr>
                     <th>Nombre</th>
                     <th>Cargo del empleado</th>
-                    <th>Especializacion</th> 
-                    <th>"Correo electronico</th>
-                    <th>Telefono</th>
-                   
-
+                    <th>Especialización</th>
+                    <th>Correo electrónico</th>
+                    <th>Teléfono</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var employee in Employees!)
+                @foreach (var employee in filteredEmployees)
                 {
                     <tr>
-                        
-                        <td> @employee.FullName </td>
-                        <td> @employee.Position</td>
-                        <td> @employee.Specialization</td>  
-                        <td> @employee.Email</td>
-                        <td> @employee.Phone</td>
-
-
+                        <td>@employee.FullName</td>
+                        <td>@employee.Position</td>
+                        <td>@employee.Specialization</td>
+                        <td>@employee.Email</td>
+                        <td>@employee.Phone</td>
                         <td>
                             <a href="/employee/edit/@employee.Id" class="btn btn-warning">Editar</a>
-                            <button class="btn btn-danger" @onclick=@(()=>DeleteAsync(employee))>Borrar</button>
-                        
+                            <button class="btn btn-danger" @onclick="@(() => DeleteAsync(employee))">Borrar</button>
                         </td>
-
                     </tr>
                 }
             </tbody>
         </table>
-
     </Body>
- 
+
 </GenericList>
 
 @code {
-
-
     public List<Employee> Employees { get; set; }
+    public List<Employee> filteredEmployees { get; set; }
+    private string searchTerm = string.Empty;
 
     protected async override Task OnInitializedAsync()
     {
@@ -73,16 +65,37 @@
 
     private async Task Load()
     {
-        var responseHppt = await repository.GetAsync<List<Employee>>("/api/employee");
-        Employees = responseHppt.Response!;
+        var responseHttp = await repository.GetAsync<List<Employee>>("/api/employee");
+        Employees = responseHttp.Response ?? new List<Employee>();
+        filteredEmployees = new List<Employee>(Employees);
     }
 
-    private async Task DeleteAsync(Employee Employee)
+    private void Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredEmployees = new List<Employee>(Employees);
+        }
+        else
+        {
+            filteredEmployees = Employees
+                .Where(e => e.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        filteredEmployees = new List<Employee>(Employees);
+    }
+
+    private async Task DeleteAsync(Employee employee)
     {
         var result = await swal.FireAsync(new SweetAlertOptions
             {
                 Title = "Confirmación",
-                Text = "¿Esta seguro que quieres borrar el empleado?",
+                Text = "¿Está seguro que quiere borrar el empleado?",
                 Icon = SweetAlertIcon.Question,
                 ShowCancelButton = true
             });
@@ -94,7 +107,7 @@
             return;
         }
 
-        var responseHTTP = await repository.DeleteAsync($"api/employee/{Employee.Id}");
+        var responseHTTP = await repository.DeleteAsync($"api/employee/{employee.Id}");
 
         if (responseHTTP.Error)
         {
@@ -104,8 +117,8 @@
             }
             else
             {
-                var mensajeError = await responseHTTP.GetErrorMessageAsync();
-                await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+                var errorMessage = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", errorMessage, SweetAlertIcon.Error);
             }
         }
         else

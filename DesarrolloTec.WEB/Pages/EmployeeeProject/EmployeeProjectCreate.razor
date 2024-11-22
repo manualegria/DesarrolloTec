@@ -1,0 +1,38 @@
+﻿@page "/employeeproject/create"
+@using DesarrolloTec.Shared.Entities
+
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+@inject SweetAlertService swal
+
+<h3>Asignar Proyecto a Empleado</h3>
+
+<EmployeeprojectForm @ref="employeeProjectForm" EmployeeProject="employeeProject" OnSubmit="Create" ReturnAction="Return" />
+
+@code {
+    private EmployeeProject employeeProject = new();
+    private EmployeeprojectForm employeeProjectForm;
+
+    private async Task Create()
+    {
+        var responseHttp = await repository.PostAsync("/api/employeeProject", employeeProject);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            
+        }else{
+            employeeProjectForm!.FormPostedSuccessfully = true;
+            await swal.FireAsync("Éxito", "El Recurso se ha creado correctamente.");
+            
+        navigationManager.NavigateTo("/employeeprojects");
+        }
+
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("/employeeprojects");
+    }
+}

@@ -10,7 +10,13 @@
     <a class="btn btn-primary" href="/Register">Crear Usuario</a>
 </div>
 
-<GenericList MyList="Users">
+<div class="mb-3">
+    <input type="text" @bind="searchTerm" placeholder="Buscar por Nombre o Documento" class="form-control" />
+    <button class="btn btn-secondary mt-2" @onclick="Search">Buscar</button>
+    <button class="btn btn-outline-secondary mt-2" @onclick="ClearSearch">Limpiar</button>
+</div>
+
+<GenericList MyList="filteredUsers">
     <Body>
         <table class="table table-striped">
             <thead>
@@ -23,7 +29,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var user in Users!)
+                @foreach (var user in filteredUsers)
                 {
                     <tr>
                         <td>@user.Document</td>
@@ -32,7 +38,7 @@
                         <td>@user.UserType</td>
                         <td>
                             <a href="/edituser/@user.Id" class="btn btn-warning">Editar</a>
-                            <button class="btn btn-danger" @onclick=@(() => DeleteAsync(user))>Borrar</button>
+                            <button class="btn btn-danger" @onclick="@(() => DeleteAsync(user))">Borrar</button>
                         </td>
                     </tr>
                 }
@@ -43,6 +49,8 @@
 
 @code {
     public List<UserDTO> Users { get; set; } = new();
+    public List<UserDTO> filteredUsers { get; set; } = new();
+    public string searchTerm { get; set; } = string.Empty;
 
     protected async override Task OnInitializedAsync()
     {
@@ -55,12 +63,35 @@
         if (!responseHttp.Error)
         {
             Users = responseHttp.Response!;
+            filteredUsers = Users; // Inicializamos con todos los usuarios
         }
         else
         {
             var errorMessage = await responseHttp.GetErrorMessageAsync();
             await swal.FireAsync("Error", $"No se pudo cargar la lista de usuarios: {errorMessage}", SweetAlertIcon.Error);
         }
+    }
+
+    private async Task Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredUsers = Users;
+        }
+        else
+        {
+            filteredUsers = Users.Where(u =>
+                u.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                u.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                u.Document.Contains(searchTerm)
+            ).ToList();
+        }
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        filteredUsers = Users; // Restablecer la lista a todos los usuarios
     }
 
     private async Task DeleteAsync(UserDTO user)

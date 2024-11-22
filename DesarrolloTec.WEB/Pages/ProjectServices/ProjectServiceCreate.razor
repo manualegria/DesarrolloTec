@@ -1,0 +1,84 @@
+﻿@page "/projectservice/create"
+@using DesarrolloTec.Shared.Entities
+
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>Crear Servicio de Proyecto</h3>
+
+<EditForm Model="@projectService" OnValidSubmit="Create">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="project">Proyecto:</label>
+        <select id="project" @bind="projectService.ProjectId">
+            <option value="">Selecciona un proyecto</option>
+            @foreach (var project in projects)
+            {
+                    <option value="@project.Id">@project.Name</option>
+            }
+        </select>
+    </div>
+
+    <div>
+        <label for="service">Servicio:</label>
+        <select id="service" @bind="projectService.ServicesId">
+            <option value="">Selecciona un servicio</option>
+            @foreach (var service in services)
+            {
+                    <option value="@service.Id">@service.Name</option>
+            }
+        }
+        </select>
+    </div>
+
+    <button type="submit">Guardar</button>
+    <button type="button" @onclick="Return">Regresar</button>
+</EditForm>
+
+@code {
+    private ProjectService projectService = new();
+    private List<Project> projects = new();
+    private List<Service> services = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        var projectResponse = await repository.GetAsync<List<Project>>("/api/projects");
+        var serviceResponse = await repository.GetAsync<List<Service>>("/api/services");
+
+        if (projectResponse.Response != null)
+        {
+            projects = projectResponse.Response;
+        }
+
+        if (serviceResponse.Response != null)
+        {
+            services = serviceResponse.Response;
+        }
+    }
+
+    private async Task Create()
+    {
+        var responseHttp = await repository.PostAsync("/api/projectServices", projectService);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+
+        navigationManager.NavigateTo("/projectservices");
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("/projectservices");
+    }
+}

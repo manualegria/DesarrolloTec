@@ -1,0 +1,123 @@
+﻿@using DesarrolloTec.Shared.Entities
+@using DesarrolloTec.Shared.Enums
+
+
+@inject SweetAlertService swal
+@inject NavigationManager navigationManager
+@inject IRepository repository
+
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation"></NavigationLock>
+<EditForm EditContext="editContext" OnSubmit="OnSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label>Proyecto:</label>
+        <div>
+            <InputSelect @bind-Value="employeeProject.ProjectId">
+                <option value="">Selecciona un proyecto</option>
+                @foreach (var project in projects)
+                {
+                    <option value="@project.Id">@project.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => employeeProject.ProjectId)" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label>Empleado:</label>
+        <div>
+            <InputSelect @bind-Value="employeeProject.EmployeeId">
+                <option value="">Selecciona un empleado</option>
+                @foreach (var employee in employees)
+                {
+                    <option value="@employee.Id">@employee.FullName</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => employeeProject.EmployeeId)" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label>Fecha de Asignación:</label>
+        <div>
+            <InputDate width="10" @bind-Value="employeeProject.AssignedDate" />
+            <ValidationMessage For="@(() => employeeProject.AssignedDate)" />
+        </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Guardar</button>
+    <button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
+
+</EditForm>
+
+@code {
+    private EditContext editContext = null;
+    private List<Project> projects = new();
+    private List<Employee> employees = new();
+
+    protected override async void OnInitialized()
+    {
+        editContext = new EditContext(employeeProject);
+
+        // Cargar proyectos y empleados desde el repositorio
+        var projectResponse = await repository.GetAsync<List<Project>>("/api/projects");
+        var employeeResponse = await repository.GetAsync<List<Employee>>("/api/employee");
+
+        if (projectResponse.Response != null)
+        {
+            projects = projectResponse.Response;
+        }
+
+        if (employeeResponse.Response != null)
+        {
+            employees = employeeResponse.Response;
+        }
+    }
+
+    [EditorRequired]
+    [Parameter]
+    public EmployeeProject employeeProject { get; set; }
+
+    [EditorRequired]
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    [EditorRequired]
+    [Parameter]
+    public EventCallback ReturnAction { get; set; }
+
+    public bool FormPostedSuccessfully { get; set; } = false;
+
+    private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+    {
+        var formWasEdited = editContext.IsModified();
+
+        if (!formWasEdited)
+        {
+            return;
+        }
+
+        if (FormPostedSuccessfully)
+        {
+            return;
+        }
+
+        var result = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Deseas abandonar la página y perder los cambios?",
+                Icon = SweetAlertIcon.Warning,
+                ShowCancelButton = true
+            });
+
+        var confirm = !string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        context.PreventNavigation();
+    }
+}

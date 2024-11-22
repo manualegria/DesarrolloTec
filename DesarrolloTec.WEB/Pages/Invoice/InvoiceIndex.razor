@@ -5,62 +5,53 @@
 @using DesarrolloTec.WEB.Repositories
 @using DesarrolloTec.WEB.Shared
 
-
-
-@inject IRepository repository 
+@inject IRepository repository
 @inject SweetAlertService swal
 @inject NavigationManager navigationManager
 
-
 <div class="mb-3">
-
-
-    <a class="btn btn-primary " href="/invoice/create">Crear Factura</a>
-
+    <a class="btn btn-primary" href="/invoice/create">Crear Factura</a>
 </div>
 
-<GenericList MyList="Invoices">
+<div class="mb-3">
+    <input type="text" @bind="searchTerm" placeholder="Buscar por Cliente o Proyecto" class="form-control" />
+    <button class="btn btn-secondary mt-2" @onclick="Search">Buscar</button>
+    <button class="btn btn-outline-secondary mt-2" @onclick="ClearSearch">Limpiar</button>
+</div>
+
+<GenericList MyList="filteredInvoices">
 
     <Body>
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Fecha de espedición</th>
-                    <th>Estado del pago</th>
+                    <th>Fecha de Expedición</th>
+                    <th>Estado del Pago</th>
                     <th>Cliente</th>
                     <th>Proyecto</th>
-                    <th>Monto total</th>
-                   
-
+                    <th>Monto Total</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var invoice in Invoices!)
+                @foreach (var invoice in filteredInvoices)
                 {
                     <tr>
-                        
-                        <td> @invoice.DateIssued </td>
+                        <td>@invoice.DateIssued</td>
                         <td>@invoice.PaymentStatus</td>
-                        <td>@invoice.Customers?.Name </td> 
-                        <td>@invoice.Projects?.Name </td>
-                        <td> @invoice.TotalAmount</td>
-
+                        <td>@invoice.Customers?.Name</td>
+                        <td>@invoice.Projects?.Name</td>
+                        <td>@invoice.TotalAmount</td>
 
                         <td>
                             <a href="/invoice/edit/@invoice.Id" class="btn btn-warning">Editar</a>
-                            <button class="btn btn-danger" @onclick=@(()=>DeleteAsync(invoice))>Borrar</button>
-                          @*   <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(service))><i class="oi oi-trash" /> Borrar</button> *@
+                            <button class="btn btn-danger" @onclick="() => DeleteAsync(invoice)">Borrar</button>
                         </td>
-
                     </tr>
                 }
             </tbody>
         </table>
-
     </Body>
- 
 </GenericList>
-
 
 <script>
     window.disableUnloadWarning = function () {
@@ -68,12 +59,10 @@
     };
 </script>
 
-
-
 @code {
-
-
     public List<Invoice> Invoices { get; set; }
+    public List<Invoice> filteredInvoices { get; set; }
+    public string searchTerm { get; set; } = string.Empty;
 
     protected async override Task OnInitializedAsync()
     {
@@ -84,14 +73,36 @@
     {
         var responseHppt = await repository.GetAsync<List<Invoice>>("/api/invoices");
         Invoices = responseHppt.Response!;
+        filteredInvoices = Invoices; // Inicializar con todas las facturas
     }
 
-    private async Task DeleteAsync(Invoice Invoice)
+    private async Task Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredInvoices = Invoices;
+        }
+        else
+        {
+            filteredInvoices = Invoices.Where(i =>
+                i.Customers?.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true ||
+                i.Projects?.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true
+            ).ToList();
+        }
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        filteredInvoices = Invoices; // Restablecer la lista a todas las facturas
+    }
+
+    private async Task DeleteAsync(Invoice invoice)
     {
         var result = await swal.FireAsync(new SweetAlertOptions
             {
                 Title = "Confirmación",
-                Text = "¿Esta seguro que quieres borrar el registro?",
+                Text = "¿Está seguro que quiere borrar el registro?",
                 Icon = SweetAlertIcon.Question,
                 ShowCancelButton = true
             });
@@ -103,7 +114,7 @@
             return;
         }
 
-        var responseHTTP = await repository.DeleteAsync($"api/invoices/{Invoice.Id}");
+        var responseHTTP = await repository.DeleteAsync($"api/invoices/{invoice.Id}");
 
         if (responseHTTP.Error)
         {

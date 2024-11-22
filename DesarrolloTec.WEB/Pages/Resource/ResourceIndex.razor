@@ -4,66 +4,62 @@
 @using DesarrolloTec.WEB.Repositories
 @using DesarrolloTec.WEB.Shared
 
-
-
-@inject IRepository repository 
+@inject IRepository repository
 @inject SweetAlertService swal
 @inject NavigationManager navigationManager
 
-
 <div class="mb-3">
-
-
-    <a class="btn btn-primary " href="/resource/create">Crear Recurso</a>
-
+    <a class="btn btn-primary" href="/resource/create">Crear Recurso</a>
 </div>
 
-<GenericList MyList="Resources">
+<div class="mb-3">
+    <input type="text" @bind="searchTerm" placeholder="Buscar por Nombre o Tipo de Recurso" class="form-control" />
+    <button class="btn btn-secondary mt-2" @onclick="Search">Buscar</button>
+    <button class="btn btn-outline-secondary mt-2" @onclick="ClearSearch">Limpiar</button>
+</div>
+
+<GenericList MyList="filteredResources">
 
     <Body>
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Nombre del recurso</th>
-                    <th>Tipo de recurso</th>
-                    <th>Descripcion del recurso</th>
-                    <th>Preyecto</th>
-                   
-
+                    <th>Nombre del Recurso</th>
+                    <th>Tipo de Recurso</th>
+                    <th>Descripción del Recurso</th>
+                    <th>Proyecto</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var resource in Resources!)
+                @foreach (var resource in filteredResources)
                 {
                     <tr>
-                        
-                        <td> @resource.ResourceName </td>
-                        <td> @resource.ResourceType</td>
-                        <td> @resource.Description</td>
-                        <td> @resource.Projects?.Name</td>
-
+                        <td>@resource.ResourceName</td>
+                        <td>@resource.ResourceType</td>
+                        <td>@resource.Description</td>
+                        <td>@resource.Projects?.Name</td>
 
                         <td>
                             <a href="/resource/edit/@resource.Id" class="btn btn-warning">Editar</a>
-                            <button class="btn btn-danger" @onclick=@(()=>DeleteAsync(resource))>Borrar</button>
-                          
+                            <button class="btn btn-danger" @onclick="() => DeleteAsync(resource)">Borrar</button>
                         </td>
-
                     </tr>
                 }
             </tbody>
         </table>
-
     </Body>
- 
 </GenericList>
 
-
+<script>
+    window.disableUnloadWarning = function () {
+        window.onbeforeunload = null; // Deshabilitar la alerta de salida
+    };
+</script>
 
 @code {
-
-
     public List<Resource> Resources { get; set; }
+    public List<Resource> filteredResources { get; set; }
+    public string searchTerm { get; set; } = string.Empty;
 
     protected async override Task OnInitializedAsync()
     {
@@ -74,14 +70,36 @@
     {
         var responseHppt = await repository.GetAsync<List<Resource>>("/api/resources");
         Resources = responseHppt.Response!;
+        filteredResources = Resources; // Inicializar con todos los recursos
     }
 
-    private async Task DeleteAsync(Resource Resource)
+    private async Task Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredResources = Resources;
+        }
+        else
+        {
+            filteredResources = Resources.Where(r =>
+                r.ResourceName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                r.ResourceType.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        filteredResources = Resources; // Restablecer la lista a todos los recursos
+    }
+
+    private async Task DeleteAsync(Resource resource)
     {
         var result = await swal.FireAsync(new SweetAlertOptions
             {
                 Title = "Confirmación",
-                Text = "¿Esta seguro que quieres borrar el registro?",
+                Text = "¿Está seguro que quiere borrar el registro?",
                 Icon = SweetAlertIcon.Question,
                 ShowCancelButton = true
             });
@@ -93,7 +111,7 @@
             return;
         }
 
-        var responseHTTP = await repository.DeleteAsync($"api/resources/{Resource.Id}");
+        var responseHTTP = await repository.DeleteAsync($"api/resources/{resource.Id}");
 
         if (responseHTTP.Error)
         {
