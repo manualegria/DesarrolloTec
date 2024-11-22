@@ -5,57 +5,50 @@
 @using DesarrolloTec.WEB.Repositories
 @using DesarrolloTec.WEB.Shared
 
-@inject IRepository repository 
+@inject IRepository repository
 @inject SweetAlertService swal
 @inject NavigationManager navigationManager
 
-
-
 <div class="mb-3">
-
-
     <a class="btn btn-primary " href="/services/create">Crear Servicio</a>
-
 </div>
 
-<GenericList MyList="Services">
+<div class="mb-3">
+    <input type="text" @bind="searchTerm" placeholder="Buscar por Nombre" class="form-control" />
+    <button class="btn btn-secondary mt-2" @onclick="Search">Buscar</button>
+    <button class="btn btn-outline-secondary mt-2" @onclick="ClearSearch">Limpiar</button>
+</div>
+
+<GenericList MyList="filteredServices">
 
     <Body>
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Nombre</th>
-                    <th>Descripcion</th>
+                    <th>Descripción</th>
                     <th>Precio Estimado</th>
-                   
-
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var service in Services!)
+                @foreach (var service in filteredServices)
                 {
                     <tr>
-                        
-                        <td> @service.Name </td>
+                        <td>@service.Name</td>
                         <td>@service.Description</td>
-                        <td> @service.EstimatedPrice</td>
-
-
+                        <td>@service.EstimatedPrice</td>
                         <td>
                             <a href="/service/edit/@service.Id" class="btn btn-warning">Editar</a>
-                            <button class="btn btn-danger" @onclick=@(()=>DeleteAsync(service))>Borrar</button>
-                          @*   <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(service))><i class="oi oi-trash" /> Borrar</button> *@
+                            <button class="btn btn-danger" @onclick="@(() => DeleteAsync(service))">Borrar</button>
                         </td>
-
                     </tr>
                 }
             </tbody>
         </table>
-
     </Body>
- 
-</GenericList>
 
+</GenericList>
 
 <script>
     window.disableUnloadWarning = function () {
@@ -63,12 +56,10 @@
     };
 </script>
 
-
-
 @code {
-
-
     public List<Service> Services { get; set; }
+    public List<Service> filteredServices { get; set; }
+    private string searchTerm = string.Empty;
 
     protected async override Task OnInitializedAsync()
     {
@@ -78,15 +69,37 @@
     private async Task Load()
     {
         var responseHppt = await repository.GetAsync<List<Service>>("/api/services");
-        Services = responseHppt.Response!;
+        Services = responseHppt.Response ?? new List<Service>();
+        filteredServices = new List<Service>(Services);
     }
 
-    private async Task DeleteAsync(Service Service)
+    private void Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredServices = new List<Service>(Services);
+        }
+        else
+        {
+            filteredServices = Services
+                .Where(s => s.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                            s.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        filteredServices = new List<Service>(Services);
+    }
+
+    private async Task DeleteAsync(Service service)
     {
         var result = await swal.FireAsync(new SweetAlertOptions
             {
                 Title = "Confirmación",
-                Text = "¿Esta seguro que quieres borrar el registro?",
+                Text = "¿Está seguro que quiere borrar el registro?",
                 Icon = SweetAlertIcon.Question,
                 ShowCancelButton = true
             });
@@ -98,13 +111,13 @@
             return;
         }
 
-        var responseHTTP = await repository.DeleteAsync($"api/services/{Service.Id}");
+        var responseHTTP = await repository.DeleteAsync($"api/services/{service.Id}");
 
         if (responseHTTP.Error)
         {
             if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                navigationManager.NavigateTo("/");
+                navigationManager.NavigateTo("/services");
             }
             else
             {

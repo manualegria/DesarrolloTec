@@ -5,76 +5,62 @@
 @using DesarrolloTec.WEB.Repositories
 @using DesarrolloTec.WEB.Shared
 
-
-
 @inject IRepository repository
 @inject SweetAlertService swal
 @inject NavigationManager navigationManager
 
-
 <div class="mb-3">
-
-
-    <a class="btn btn-primary " href="/projects/create">Crear Proyecto</a>
-
+    <a class="btn btn-primary" href="/projects/create">Crear Proyecto</a>
 </div>
 
+<div class="mb-3">
+    <input type="text" @bind="searchTerm" placeholder="Buscar por Nombre" class="form-control" />
+    <button class="btn btn-secondary mt-2" @onclick="Search">Buscar</button>
+    <button class="btn btn-outline-secondary mt-2" @onclick="ClearSearch">Limpiar</button>
+</div>
 
+<GenericList MyList="filteredProjects">
 
-    <GenericList MyList="Projects">
-
-        <Body>
-            <table class="table table-striped">
-                <thead>
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Estado</th>
+                    <th>Presupuesto</th>
+                    <th>Descripción</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Cliente</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var project in filteredProjects)
+                {
                     <tr>
-                        <th>Nombre</th>
-                        <th>Estado</th>
-                        <th>Presupuesto</th>
-                        <th>Descripción</th>
-                        <th>Fecha Inicio</th>
-                        <th>Fecha Fin</th>
-                        <th>Cliente</th>
-
-
+                        <td>@project.Name</td>
+                        <td>@project.Status</td>
+                        <td>@project.Budget</td>
+                        <td>@project.Descripcion</td>
+                        <td>@project.StartDate</td>
+                        <td>@project.EndDate</td>
+                        <td>@project.Customers?.Name</td>
+                        <td>
+                            <a href="/project/edit/@project.Id" class="btn btn-warning">Editar</a>
+                            <button class="btn btn-danger" @onclick="() => DeleteAsync(project)">Borrar</button>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var project in Projects!)
-                    {
-                        <tr>
+                }
+            </tbody>
+        </table>
+    </Body>
 
-                            <td> @project.Name </td>
-                            <td>@project.Status</td>
-                            <td> @project.Budget</td>
-                            <td> @project.Descripcion</td>
-                            <td> @project.StartDate</td>
-                            <td> @project.EndDate</td>
-                            <td> @project.Customers?.Name </td>
-
-
-                            <td>
-                                <a href="/project/edit/@project.Id" class="btn btn-warning">Editar</a>
-                                <button class="btn btn-danger" @onclick=@(()=>DeleteAsync(project))>Borrar</button>
-                                @*   <button class="btn btn-danger btn-sm" @onclick=@(() => DeleteAsync(service))><i class="oi oi-trash" /> Borrar</button> *@
-                            </td>
-
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-        </Body>
-
-    </GenericList>
-
-
-
-
+</GenericList>
 
 @code {
-
-
     public List<Project> Projects { get; set; }
+    public List<Project> filteredProjects { get; set; }
+    private string searchTerm = string.Empty;
 
     protected async override Task OnInitializedAsync()
     {
@@ -83,8 +69,29 @@
 
     private async Task Load()
     {
-        var responseHppt = await repository.GetAsync<List<Project>>("/api/projects");
-        Projects = responseHppt.Response!;
+        var responseHttp = await repository.GetAsync<List<Project>>("/api/projects");
+        Projects = responseHttp.Response ?? new List<Project>();
+        filteredProjects = new List<Project>(Projects);
+    }
+
+    private void Search()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredProjects = new List<Project>(Projects);
+        }
+        else
+        {
+            filteredProjects = Projects
+                .Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        filteredProjects = new List<Project>(Projects);
     }
 
     private async Task DeleteAsync(Project project)
@@ -92,7 +99,7 @@
         var result = await swal.FireAsync(new SweetAlertOptions
             {
                 Title = "Confirmación",
-                Text = "¿Esta seguro que quieres borrar el registro?",
+                Text = "¿Está seguro que desea borrar este proyecto?",
                 Icon = SweetAlertIcon.Question,
                 ShowCancelButton = true
             });
@@ -114,8 +121,8 @@
             }
             else
             {
-                var mensajeError = await responseHTTP.GetErrorMessageAsync();
-                await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+                var errorMessage = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", errorMessage, SweetAlertIcon.Error);
             }
         }
         else
