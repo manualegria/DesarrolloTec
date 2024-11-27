@@ -5,6 +5,7 @@
 @using DesarrolloTec.WEB.Pages.Auth
 @using Veterinary.Shared.DTOs
 @using Veterinary.WEB.Auth
+@using DesarrolloTec.WEB.Shared
 
 @inject IRepository repository
 @inject SweetAlertService sweetAlertService
@@ -90,7 +91,9 @@
                         </div>
                     </div>
 
-
+                      <div class="mb-3"> 
+                        <InputImg Label="Foto" ImageSelected="ImageSelected" ImageURL="@imageUrl" /> 
+                    </div> 
                 </div>
             </div>
 
@@ -143,7 +146,7 @@
 
 @code {
     private UserDTO userDTO = new();
-
+    private bool loading;
     //UserDTO
     // {
     //     UserType = UserType.User // Tipo de usuario por defecto
@@ -151,6 +154,21 @@
 
     private string imageUrl;
 
+    protected override async Task OnInitializedAsync()
+    {
+        // await OnInitializedAsync();
+        if (!string.IsNullOrEmpty(userDTO.Photo))
+        {
+            imageUrl = userDTO.Photo;
+            userDTO.Photo = null;
+        }
+    }
+
+    private void ImageSelected(string imagenBase64)
+    {
+        userDTO.Photo = imagenBase64;
+        imageUrl = null;
+    }
 
     private async Task CreateUserAsync()
     {
@@ -176,4 +194,6 @@
         // Navega a la página de inicio o la página que desees (ej. Welcome).
         navigationManager.NavigateTo("/");
     }
+
+   
 }

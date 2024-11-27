@@ -1,4 +1,5 @@
 ﻿using DesarrolloTec.API.Data;
+using DesarrolloTec.API.Migrations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Veterinary.Shared.DTOs;
@@ -51,8 +52,9 @@ namespace DesarrolloTec.API.Helpers
 
         public async Task<User> GetUserAsync(string email)
         {
-            return await _context.Users
+           var user = await _context.Users
                 .FirstOrDefaultAsync(x => x.Email == email);
+                return user!;
         }
 
         public async Task<bool> IsUserInRoleAsync(User user, string roleName)
@@ -63,47 +65,59 @@ namespace DesarrolloTec.API.Helpers
 
         public async Task<SignInResult> LoginAsync(LoginDTO model)
         {
-
             return await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
-
         }
 
         public async Task LogoutAsync()
         {
-
             await _signInManager.SignOutAsync();
-
         }
 
-        // Implementación del método GetAllUsersAsync
-        public async Task<List<User>> GetAllUsersAsync()
+        public async Task<User> GetUserAsync(Guid userId)
         {
-            return await _userManager.Users.ToListAsync();  // Obtiene todos los usuarios desde la base de datos
+            var user = await _context.Users
+                .FirstOrDefaultAsync(x => x.Id == userId.ToString());
+            return user!;
         }
 
-        public async Task<User> GetUserByIdAsync(string id)
+        public async Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword)
         {
-            return await _userManager.FindByIdAsync(id);
+            return await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
         }
-
-        public async Task<IdentityResult> DeleteUserAsync(User user)
-        {
-            return await _userManager.DeleteAsync(user);
-        }
-
         public async Task<IdentityResult> UpdateUserAsync(User user)
         {
             return await _userManager.UpdateAsync(user);
         }
 
-        public async Task<IList<string>> GetRolesAsync(User user)
-        {
-            return await _userManager.GetRolesAsync(user);
-        }
+        // Implementación del método GetAllUsersAsync
+        //    public async Task<List<User>> GetAllUsersAsync()
+        //    {
+        //        return await _userManager.Users.ToListAsync();  // Obtiene todos los usuarios desde la base de datos
+        //    }
 
-        public async Task<IdentityResult> RemoveFromRolesAsync(User user, IEnumerable<string> roles)
-        {
-            return await _userManager.RemoveFromRolesAsync(user, roles);
-        }
+        //    public async Task<User> GetUserByIdAsync(string id)
+        //    {
+        //        return await _userManager.FindByIdAsync(id);
+        //    }
+
+        //    public async Task<IdentityResult> DeleteUserAsync(User user)
+        //    {
+        //        return await _userManager.DeleteAsync(user);
+        //    }
+
+        //    public async Task<IdentityResult> UpdateUserAsync(User user)
+        //    {
+        //        return await _userManager.UpdateAsync(user);
+        //    }
+
+        //    public async Task<IList<string>> GetRolesAsync(User user)
+        //    {
+        //        return await _userManager.GetRolesAsync(user);
+        //    }
+
+        //    public async Task<IdentityResult> RemoveFromRolesAsync(User user, IEnumerable<string> roles)
+        //    {
+        //        return await _userManager.RemoveFromRolesAsync(user, roles);
+        //    }
+     }
     }
-}
