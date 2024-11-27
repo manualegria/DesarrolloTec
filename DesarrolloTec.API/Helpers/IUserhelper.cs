@@ -20,13 +20,23 @@ namespace DesarrolloTec.API.Helpers
 
         Task LogoutAsync();
 
-        // Implementación del método GetAllUsersAsync
-         Task<List<User>> GetAllUsersAsync();
-        Task<User> GetUserByIdAsync(string id); // Nuevo método
-        Task<IdentityResult> DeleteUserAsync(User user); // Nuevo métod
+
+
+        Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword);
+
         Task<IdentityResult> UpdateUserAsync(User user);
-        Task<IList<string>> GetRolesAsync(User user); // Nuevo método
-        Task<IdentityResult> RemoveFromRolesAsync(User user, IEnumerable<string> roles); // Nuevo método
+
+        Task<User> GetUserAsync(Guid userId);
+
+
+
+        // Implementación del método GetAllUsersAsync
+        // Task<List<User>> GetAllUsersAsync();
+        //Task<User> GetUserByIdAsync(string id); // Nuevo método
+        //Task<IdentityResult> DeleteUserAsync(User user); // Nuevo métod
+        //Task<IdentityResult> UpdateUserAsync(User user);
+        //Task<IList<string>> GetRolesAsync(User user); // Nuevo método
+        //Task<IdentityResult> RemoveFromRolesAsync(User user, IEnumerable<string> roles); // Nuevo método
 
     }
 }

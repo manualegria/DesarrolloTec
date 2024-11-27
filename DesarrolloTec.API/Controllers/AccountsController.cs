@@ -19,17 +19,31 @@ namespace Veterinary.API.Controllers
     {
         private readonly IUserhelper _userHelper;
         private readonly IConfiguration _configuration;
+        private readonly IFileStorage _fileStorage;
+        private readonly string _container;
 
-        public AccountsController(IUserhelper userHelper, IConfiguration configuration)
+        public AccountsController(IUserhelper userHelper, IConfiguration configuration, IFileStorage fileStorage)
         {
             _userHelper = userHelper;
             _configuration = configuration;
+            _fileStorage = fileStorage;
+            _container = "users";
         }
 
         [HttpPost("CreateUser")]
         public async Task<ActionResult> CreateUser([FromBody] UserDTO model)
         {
             User user = model;
+
+            if (!string.IsNullOrEmpty(model.Photo))
+
+            {
+                var photoUser = Convert.FromBase64String(model.Photo);
+
+                model.Photo = await _fileStorage.SaveFileAsync(photoUser, ".jpg", _container);
+
+            }
+
             var result = await _userHelper.AddUserAsync(user, model.Password);
             if (result.Succeeded)
             {
@@ -40,29 +54,29 @@ namespace Veterinary.API.Controllers
             return BadRequest(result.Errors.FirstOrDefault());
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<User>>> GetAllUsers()
-        {
-            try
-            {
-                // Llama al método de UserHelper para obtener todos los usuarios
-                var users = await _userHelper.GetAllUsersAsync();
+        //[HttpGet]
+        //public async Task<ActionResult<List<User>>> GetAllUsers()
+        //{
+        //    try
+        //    {
+        //        // Llama al método de UserHelper para obtener todos los usuarios
+        //        var users = await _userHelper.GetAllUsersAsync();
 
-                // Si se obtienen usuarios, se retornan con un estado 200 OK
-                if (users != null && users.Count > 0)
-                {
-                    return Ok(users);
-                }
+        //        // Si se obtienen usuarios, se retornan con un estado 200 OK
+        //        if (users != null && users.Count > 0)
+        //        {
+        //            return Ok(users);
+        //        }
 
-                // Si no hay usuarios, retornamos un estado 404
-                return NotFound("No se encontraron usuarios.");
-            }
-            catch (Exception ex)
-            {
-                // En caso de un error, retornamos un error 500
-                return StatusCode(500, $"Error al obtener los usuarios: {ex.Message}");
-            }
-        }
+        //        // Si no hay usuarios, retornamos un estado 404
+        //        return NotFound("No se encontraron usuarios.");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // En caso de un error, retornamos un error 500
+        //        return StatusCode(500, $"Error al obtener los usuarios: {ex.Message}");
+        //    }
+        //}
     
 
         [HttpPost("Login")]
@@ -78,53 +92,70 @@ namespace Veterinary.API.Controllers
             return BadRequest("Email o contraseña incorrectos.");
         }
 
-        [HttpDelete("DeleteUser/{id}")]
-        public async Task<IActionResult> DeleteUser(string id)
+        //[HttpDelete("DeleteUser/{id}")]
+        //public async Task<IActionResult> DeleteUser(string id)
+        //{
+        //    var user = await _userHelper.GetUserByIdAsync(id);
+        //    if (user == null)
+        //    {
+        //        return NotFound("Usuario no encontrado.");
+        //    }
+
+        //    var result = await _userHelper.DeleteUserAsync(user);
+        //    if (result.Succeeded)
+        //    {
+        //        return Ok("Usuario eliminado correctamente.");
+        //    }
+
+        //    return BadRequest("No se pudo eliminar el usuario.");
+        //}
+
+        [HttpPut]
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<ActionResult> Put(User user)
         {
-            var user = await _userHelper.GetUserByIdAsync(id);
-            if (user == null)
+            try
             {
-                return NotFound("Usuario no encontrado.");
-            }
+                if (!string.IsNullOrEmpty(user.Photo))
+                {
+                    var photoUser = Convert.FromBase64String(user.Photo);
+                    user.Photo = await _fileStorage.SaveFileAsync(photoUser, ".jpg", _container);
+                }
 
-            var result = await _userHelper.DeleteUserAsync(user);
-            if (result.Succeeded)
+                var currentUser = await _userHelper.GetUserAsync(user.Email!);
+
+                if (currentUser == null)
+                {
+                    return NotFound();
+                }
+
+                currentUser.Document = user.Document;
+                currentUser.FirstName = user.FirstName;
+                currentUser.LastName = user.LastName;
+                currentUser.PhoneNumber = user.PhoneNumber;
+                currentUser.Photo = !string.IsNullOrEmpty(user.Photo) && user.Photo != currentUser.Photo ? user.Photo : currentUser.Photo;
+
+                var result = await _userHelper.UpdateUserAsync(currentUser);
+
+                if (result.Succeeded)
+                {
+                    return NoContent();
+                }
+                return BadRequest(result.Errors.FirstOrDefault());
+            }
+            catch (Exception ex)
             {
-                return Ok("Usuario eliminado correctamente.");
+                return BadRequest(ex.Message);
             }
-
-            return BadRequest("No se pudo eliminar el usuario.");
         }
 
-        [HttpPut("EditUser/{id}")]
-        public async Task<IActionResult> EditUser(string id, [FromBody] UserDTO model)
+        [HttpGet]
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<ActionResult> Get()
         {
-            var user = await _userHelper.GetUserByIdAsync(id);
-            if (user == null)
-            {
-                return NotFound("Usuario no encontrado.");
-            }
-
-            user.FirstName = model.FirstName;
-            user.LastName = model.LastName;
-            user.Document = model.Document;
-            user.Photo = model.Photo;
-            user.UserType = model.UserType;
-
-            var result = await _userHelper.UpdateUserAsync(user);
-            if (!result.Succeeded)
-            {
-                return BadRequest("No se pudo actualizar el usuario.");
-            }
-
-            var currentRoles = await _userHelper.GetRolesAsync(user);
-            if (!currentRoles.Contains(user.UserType.ToString()))
-            {
-                await _userHelper.RemoveFromRolesAsync(user, currentRoles);
-                await _userHelper.AddUserToRoleAsync(user, user.UserType.ToString());
-            }
-
-            return Ok("Usuario actualizado correctamente.");
+            return Ok(await _userHelper.GetUserAsync(User.Identity!.Name!));
         }
 
         //[HttpPut("EditUser/{id}")]
