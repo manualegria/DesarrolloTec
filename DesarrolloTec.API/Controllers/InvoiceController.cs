@@ -1,6 +1,5 @@
 ﻿using DesarrolloTec.API.Data;
 using DesarrolloTec.Shared.Entities;
-using DesarrolloTec.Shered.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
