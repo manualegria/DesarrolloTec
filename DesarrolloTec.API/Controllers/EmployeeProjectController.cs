@@ -84,7 +84,6 @@ namespace DesarrolloTec.API.Controllers
         }
 
         [HttpPut]
-
         public async Task<IActionResult> Put(EmployeeProject employeeproject)
         {
             _context.EmployeeProjects.Update(employeeproject);
