@@ -13,7 +13,7 @@ namespace DesarrolloTec.API.Controllers
  
 
     [ApiController]
-    [Route("/api/employeeprojectcontroller")]
+    [Route("/api/employeeProject")]
 
     public class EmployeeProjectController : ControllerBase
     {

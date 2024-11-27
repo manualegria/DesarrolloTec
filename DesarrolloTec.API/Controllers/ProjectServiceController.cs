@@ -12,6 +12,7 @@ namespace DesarrolloTec.API.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
     [ApiController]
+<<<<<<< HEAD
     [Route("/api/projectServices")]
 
 using DesarrolloTec.Shered.Entities;
@@ -23,6 +24,9 @@ using System.Security.AccessControl;
 namespace DesarrolloTec.API.Controllers
 {
 
+=======
+    [Route("api/projectServices")]
+>>>>>>> emirDev
     public class ProjectServiceController : ControllerBase
     {
 
