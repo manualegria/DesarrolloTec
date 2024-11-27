@@ -31,10 +31,10 @@ namespace DesarrolloTec.API.Controllers
                 .ToListAsync();
         }
 
-        public async Task<IActionResult> Get()
-        {
-            return Ok(await _context.Invoices.ToListAsync());
-        }
+        //public async Task<IActionResult> Get()
+        //{
+        //    return Ok(await _context.Invoices.ToListAsync());
+        //}
 
 
         [HttpGet("{id:int}")]

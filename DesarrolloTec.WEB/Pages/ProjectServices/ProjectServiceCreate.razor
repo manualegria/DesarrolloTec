@@ -1,9 +1,12 @@
 ﻿@page "/projectservice/create"
 @using DesarrolloTec.Shared.Entities
+@using CurrieTechnologies.Razor.SweetAlert2
+
 
 @inject IRepository repository
 @inject NavigationManager navigationManager
 @inject SweetAlertService sweetAlertService
+@inject SweetAlertService swal
 
 <h3>Crear Servicio de Proyecto</h3>
 
@@ -70,8 +73,7 @@
         if (responseHttp.Error)
         {
             var message = await responseHttp.GetErrorMessageAsync();
-            await sweetAlertService.FireAsync("Error", message);
-            return;
+            await swal.FireAsync("Error", message, SweetAlertIcon.Error);
         }
 
         navigationManager.NavigateTo("/projectservices");
