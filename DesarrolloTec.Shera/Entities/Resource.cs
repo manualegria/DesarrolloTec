@@ -1,4 +1,5 @@
 ﻿using DesarrolloTec.Shered.Entities;
+﻿using DesarrolloTec.Sherad.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
