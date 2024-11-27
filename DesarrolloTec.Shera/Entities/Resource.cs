@@ -11,7 +11,6 @@ namespace DesarrolloTec.Shared.Entities
 {
     public class Resource
     {
-
         public int Id { get; set; }
 
         [Display(Name = "Nombre del recurso")]
@@ -28,7 +27,6 @@ namespace DesarrolloTec.Shared.Entities
         [MaxLength(50, ErrorMessage = "El {0}, no puede tener mas de 50 caractere.")]
         [Required(ErrorMessage = "El {0} es obligatorio")]
         public string Description { get; set; }
-
         
         public Project Projects { get; set; }
         public int ProjectId { get; set; }
