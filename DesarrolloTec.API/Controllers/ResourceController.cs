@@ -15,22 +15,13 @@ namespace DesarrolloTec.API.Controllers
     public class ResourceController : ControllerBase
     {
         private readonly DataContext _context;
-
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.AccessControl;
-
-namespace DesarrolloTec.API.Controllers
-{
-    public class ResourceController : ControllerBase
-    {
-        private readonly DataContext _context;
         public ResourceController(DataContext context)
         {
             _context = context;
         }
 
         [HttpGet]
+
         public async Task<List<Resource>> GetInvoicesAsync()
         {
             return await _context.Resourcess
@@ -38,24 +29,19 @@ namespace DesarrolloTec.API.Controllers
                 .ToListAsync();
         }
 
-        public async Task<IActionResult> Get()
-        {
-            return Ok(await _context.Resourcess.ToListAsync());
-        }
 
         [HttpGet("{id:int}")]
 
         public async Task<IActionResult> Get(int id)
         {
-
             var resource = await _context.Resourcess
             .Include(i => i.Projects)
             .SingleOrDefaultAsync(x => x.Id == id);
-            var resource = await _context.Resourcess.SingleOrDefaultAsync(x => x.Id == id);
 
             if (resource == null)
             {
                 return NotFound();
+
             }
             else
             {
@@ -72,9 +58,6 @@ namespace DesarrolloTec.API.Controllers
             return Ok(new
             {
                 message = "Recurso creado con éxito.",
-            return Ok(new
-            {
-                message = "Recurso creado con exito.",
                 data = resource
             });
         }
@@ -88,12 +71,6 @@ namespace DesarrolloTec.API.Controllers
             return Ok(new
             {
                 message = "Recurso Actualizado con éxito.",
-            _context.Resourcess.Add(resource);
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                message = "Recurso Actualizado al proyecto con éxito.",
                 data = resource
             });
         }
@@ -102,7 +79,6 @@ namespace DesarrolloTec.API.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-
             var resourceDelete = await _context.Resourcess
                 .Where(x => x.Id == id).ExecuteDeleteAsync();
 
@@ -114,17 +90,6 @@ namespace DesarrolloTec.API.Controllers
             else
             {
                 return Ok(new { message = "Recurso eliminado con éxito." });
-            var resourceDelete = await _context.Resourcess.
-                Where(x => x.Id == id)
-                .ExecuteDeleteAsync();
-
-            if (resourceDelete == 0)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return Ok(new { message = "Recurso eliminado con éxito.", data = resourceDelete });
             }
         }
     }

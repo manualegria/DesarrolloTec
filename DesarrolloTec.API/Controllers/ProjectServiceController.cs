@@ -6,42 +6,25 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace DesarrolloTec.API.Controllers
 {
 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
     [ApiController]
-<<<<<<< HEAD
     [Route("/api/projectServices")]
-
-using DesarrolloTec.Shered.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.AccessControl;
-
-
-namespace DesarrolloTec.API.Controllers
-{
-
-=======
-    [Route("api/projectServices")]
->>>>>>> emirDev
     public class ProjectServiceController : ControllerBase
     {
 
         private readonly DataContext _context;
-
         public ProjectServiceController(DataContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
-        {
-            return Ok(await _context.ProjectService.ToListAsync());
-        }
+
         //public async Task<IActionResult> Get()
         //{
         //    return Ok(await _context.ProjectService.ToListAsync());
@@ -49,20 +32,17 @@ namespace DesarrolloTec.API.Controllers
 
         public async Task<List<ProjectService>> GetInvoicesAsync()
         {
-            return await _context.ProjectService
+            return await _context.ProjectServices
                 .Include(i => i.Projects)
                 .Include(i => i.Services)
                 .ToListAsync();
         }
 
-            return Ok(await _context.ProjectServices.ToListAsync());
-        }
         [HttpGet("{id:int}")]
 
         public async Task<IActionResult> Get(int id)
         {
-
-            var projectservices = await _context.ProjectService.SingleOrDefaultAsync(x => x.Id == id);
+            var projectservices = await _context.ProjectServices.SingleOrDefaultAsync(x => x.Id == id);
 
             if (projectservices == null)
             {
@@ -72,38 +52,19 @@ namespace DesarrolloTec.API.Controllers
             else
             {
                 return Ok(projectservices);
-
-            var projectservice = await _context.ProjectServices.SingleOrDefaultAsync(x => x.Id == id);
-
-            if (projectservice == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return Ok(projectservice);
             }
         }
 
         [HttpPost]
+
         public async Task<IActionResult> Post(ProjectService projectservices)
         {
-            _context.ProjectService.Add(projectservices);
+            _context.ProjectServices.Add(projectservices);
             await _context.SaveChangesAsync();
             return Ok(new
             {
                 message = "creado con éxito.",
                 data = projectservices
-
-        public async Task<IActionResult> Post(ProjectService projectservice)
-        {
-            _context.ProjectServices.Add(projectservice);
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                message = "Servicio integrado al proyecto creado con éxito.",
-                data = projectservice
             });
         }
 
@@ -111,22 +72,12 @@ namespace DesarrolloTec.API.Controllers
 
         public async Task<IActionResult> Put(ProjectService projectservices)
         {
-            _context.ProjectService.Update(projectservices);
+            _context.ProjectServices.Update(projectservices);
             await _context.SaveChangesAsync();
             return Ok(new
             {
                 message = " Actualizado con éxito.",
                 data = projectservices
-
-        public async Task<IActionResult> Put(ProjectService projectservice)
-        {
-            _context.ProjectServices.Add(projectservice);
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                message = "Servicio Actualizado al proyecto con éxito.",
-                data = projectservice
             });
         }
 
@@ -134,8 +85,7 @@ namespace DesarrolloTec.API.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-
-            var Delete = await _context.ProjectService
+            var Delete = await _context.ProjectServices
                 .Where(x => x.Id == id).ExecuteDeleteAsync();
 
             if (Delete == 0)
@@ -146,19 +96,6 @@ namespace DesarrolloTec.API.Controllers
             else
             {
                 return Ok(new { message = "Registro eliminado con éxito." });
-
-            var projectserviceDelete = await _context.ProjectServices.
-                Where(x => x.Id == id)
-                .ExecuteDeleteAsync();
-
-            if (projectserviceDelete == 0)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return Ok(new { message = "Servicio del proyecto eliminado con éxito.", data = projectserviceDelete });
-
             }
         }
     }

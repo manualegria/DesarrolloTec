@@ -10,7 +10,7 @@ namespace DesarrolloTec.API.Controllers
 
 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
- 
+
 
     [ApiController]
     [Route("/api/employeeProject")]
@@ -65,9 +65,7 @@ namespace DesarrolloTec.API.Controllers
             await _context.SaveChangesAsync();
             return Ok(new
             {
-
                 message = "creado con éxito.",
-                message = "Empleado asignado a projecto.",
                 data = employeeproject
             });
         }
@@ -80,15 +78,6 @@ namespace DesarrolloTec.API.Controllers
             return Ok(new
             {
                 message = " Actualizado con éxito.",
-
-        //Actulizar
-        public async Task<IActionResult> Put(EmployeeProject employeeproject)
-        {
-            _context.EmployeeProjects.Add(employeeproject);
-            await _context.SaveChangesAsync();
-            return Ok(new
-            {
-                message = "Empleado Actualizado en proyecto.",
                 data = employeeproject
             });
         }
@@ -104,20 +93,9 @@ namespace DesarrolloTec.API.Controllers
             {
                 return NotFound(new { message = "Registro no encontrado." });
 
-        //Eliminar
-        public async Task<IActionResult> Delete(int id)
-        {
-            var employeeprojectDelete = await _context.EmployeeProjects
-                .Where(x => x.Id == id).ExecuteDeleteAsync();
-
-            if (employeeprojectDelete == 0)
-            {
-                return NotFound(new { message = "Empleado no encontrado en el proyecto." });
-
             }
             else
             {
-
                 return Ok(new { message = "Registro eliminado con éxito." });
 
 
