@@ -16,6 +16,19 @@ namespace DesarrolloTec.API.Controllers
     {
 
 
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.AccessControl;
+
+namespace DesarrolloTec.API.Controllers
+{
+
+    [ApiController]
+    [Route("/api/employeeprojectcontroller")]
+
+    public class EmployeeProjectController : ControllerBase
+    {
+
         private readonly DataContext _context;
         public EmployeeProjectController(DataContext context)
         {
@@ -69,7 +82,6 @@ namespace DesarrolloTec.API.Controllers
         }
 
         [HttpPut]
-
         public async Task<IActionResult> Put(EmployeeProject employeeproject)
         {
             _context.EmployeeProjects.Update(employeeproject);
@@ -96,6 +108,9 @@ namespace DesarrolloTec.API.Controllers
             else
             {
                 return Ok(new { message = "Registro eliminado con éxito." });
+
+                return Ok(new { message = "Empleado eliminado del projecto con éxito." });
+
             }
         }
     }
