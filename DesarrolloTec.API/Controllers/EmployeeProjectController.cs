@@ -10,18 +10,7 @@ namespace DesarrolloTec.API.Controllers
 
 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [ApiController]
-    [Route("/api/employeeProject")]
-    public class EmployeeProjectController : ControllerBase
-    {
-
-
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.AccessControl;
-
-namespace DesarrolloTec.API.Controllers
-{
+ 
 
     [ApiController]
     [Route("/api/employeeprojectcontroller")]
@@ -109,7 +98,6 @@ namespace DesarrolloTec.API.Controllers
             {
                 return Ok(new { message = "Registro eliminado con éxito." });
 
-                return Ok(new { message = "Empleado eliminado del projecto con éxito." });
 
             }
         }
