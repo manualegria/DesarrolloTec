@@ -12,7 +12,7 @@ namespace DesarrolloTec.API.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
     [ApiController]
-    [Route("api/projectServices")]
+    [Route("/api/projectServices")]
     public class ProjectServiceController : ControllerBase
     {
 

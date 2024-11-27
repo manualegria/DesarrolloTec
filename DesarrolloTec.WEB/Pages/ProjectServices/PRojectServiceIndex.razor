@@ -59,7 +59,7 @@
 
     private async Task Load()
     {
-        var responseHTTP = await repository.GetAsync<List<ProjectService>>("/api/projectservices");
+        var responseHTTP = await repository.GetAsync<List<ProjectService>>("/api/projectServices");
         ProjectServices = responseHTTP.Response ?? new List<ProjectService>();
         filteredProjectServices = new List<ProjectService>(ProjectServices);
     }
